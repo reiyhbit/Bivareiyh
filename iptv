@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced M3U Player - Full Feature Support</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #2196F3;
+            --secondary: #FF9800;
+            --success: #4CAF50;
+            --danger: #f44336;
+            --dark: #1a1a1a;
+            --light: #f5f5f5;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .player-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        @media (min-width: 1024px) {
+            .player-container {
+                flex-direction: row;
+            }
+        }
+        
+        .video-section {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        #video-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .video-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .control-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        select, button, input {
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        select option {
+            background: var(--dark);
+            color: white;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        button.primary {
+            background: var(--primary);
+        }
+        
+        button.success {
+            background: var(--success);
+        }
+        
+        button.danger {
+            background: var(--danger);
+        }
+        
+        .video-info {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .video-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .video-description {
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+        
+        .epg-info {
+            background: rgba(255, 152, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--secondary);
+            margin-bottom: 15px;
+        }
+        
+        .playlist-section {
+            flex: 0 0 400px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            max-height: 700px;
+            overflow-y: auto;
+        }
+        
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .playlist-title {
+            font-size: 1.3rem;
+        }
+        
+        .playlist-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .playlist-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .playlist-controls input {
+            flex: 1;
+        }
+        
+        .playlist {
+            list-style: none;
+        }
+        
+        .playlist-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .playlist-item.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .playlist-item.live {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .playlist-item.vod {
+            border-left: 4px solid var(--primary);
+        }
+        
+        .channel-logo {
+            width: 30px;
+            height: 30px;
+            margin-right: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        .channel-info {
+            flex: 1;
+        }
+        
+        .channel-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
+        
+        .channel-group {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+        
+        .settings-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .settings-title {
+            font-size: 1.3rem;
+        }
+        
+        .settings-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .setting-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .drm-info {
+            background: rgba(33, 150, 243, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            margin-top: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: var(--danger);
+            font-size: 1.2rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Advanced M3U Player</h1>
+            <p class="subtitle">Full-featured IPTV player with DRM, EPG, subtitles, and custom playlists</p>
+        </header>
+        
+        <div class="player-container">
+            <div class="video-section">
+                <div class="video-wrapper">
+                    <video id="video-player" controls crossorigin="anonymous"></video>
+                </div>
+                
+                <div class="video-info">
+                    <h2 class="video-title">
+                        <i class="fas fa-play-circle"></i>
+                        <span id="current-title">Select a channel to start watching</span>
+                    </h2>
+                    <p class="video-description" id="current-description">Choose from the playlist or load your own M3U file.</p>
+                </div>
+                
+                <div class="epg-info hidden" id="epg-info">
+                    <h3><i class="fas fa-tv"></i> Now Playing</h3>
+                    <p id="epg-now">No EPG information available</p>
+                    <p id="epg-next" class="video-description"></p>
+                </div>
+                
+                <div class="drm-info hidden" id="drm-info">
+                    <h3><i class="fas fa-shield-alt"></i> DRM Protected Content</h3>
+                    <p>This content is protected with DRM. Playback quality and availability may vary.</p>
+                </div>
+                
+                <div class="video-controls">
+                    <div class="control-group">
+                        <div class="control-label">Audio Track</div>
+                        <select id="audio-track-select">
+                            <option value="">Default</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-label">Subtitles</div>
+                        <select id="subtitle-select">
+                            <option value="">None</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-label">Playback Speed</div>
+                        <select id="playback-speed">
+                            <option value="0.5">0.5x</option>
+                            <option value="0.75">0.75x</option>
+                            <option value="1" selected>Normal</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                            <option value="2">2x</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="control-label">Quality</div>
+                        <select id="quality-select">
+                            <option value="auto">Auto</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="playlist-section">
+                <div class="playlist-header">
+                    <h2 class="playlist-title">Playlist</h2>
+                    <span class="playlist-count" id="channel-count">0 channels</span>
+                </div>
+                
+                <div class="playlist-controls">
+                    <input type="text" id="playlist-search" placeholder="Search channels...">
+                    <button id="load-playlist-btn" title="Load Custom Playlist">
+                        <i class="fas fa-folder-open"></i>
+                    </button>
+                    <input type="file" id="playlist-file" accept=".m3u,.m3u8" class="hidden">
+                </div>
+                
+                <div id="playlist-container">
+                    <div class="loading">Loading playlist...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-panel">
+            <div class="settings-header">
+                <h2 class="settings-title">Player Settings</h2>
+                <button id="toggle-settings">
+                    <i class="fas fa-cog"></i> Toggle Settings
+                </button>
+            </div>
+            
+            <div class="settings-content" id="settings-content">
+                <div class="setting-group">
+                    <div class="setting-label">Custom Title</div>
+                    <input type="text" id="custom-title" placeholder="Enter custom title">
+                </div>
+                
+                <div class="setting-group">
+                    <div class="setting-label">Custom Image URL</div>
+                    <input type="text" id="custom-image" placeholder="Enter image URL">
+                </div>
+                
+                <div class="setting-group">
+                    <div class="setting-label">Custom Headers (JSON)</div>
+                    <textarea id="custom-headers" placeholder='{"User-Agent": "Custom Player"}' rows="3"></textarea>
+                </div>
+                
+                <div class="setting-group">
+                    <div class="setting-label">Auto Play</div>
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="auto-play" checked>
+                        <span>Automatically play videos when selected</span>
+                    </label>
+                </div>
+                
+                <div class="setting-group">
+                    <div class="setting-label">DRM Support</div>
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="widevine-support" checked>
+                            <span>Widevine</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="fairplay-support">
+                            <span>FairPlay (iOS)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="clearkey-support">
+                            <span>ClearKey</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <button class="primary" id="apply-settings">
+                        <i class="fas fa-check"></i> Apply Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Advanced M3U Player &copy; 2023 | Supports LIVE, VOD, DRM, EPG, and custom playlists</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const videoPlayer = document.getElementById('video-player');
+            const playlistContainer = document.getElementById('playlist-container');
+            const channelCount = document.getElementById('channel-count');
+            const currentTitle = document.getElementById('current-title');
+            const currentDescription = document.getElementById('current-description');
+            const epgInfo = document.getElementById('epg-info');
+            const epgNow = document.getElementById('epg-now');
+            const epgNext = document.getElementById('epg-next');
+            const drmInfo = document.getElementById('drm-info');
+            const audioTrackSelect = document.getElementById('audio-track-select');
+            const subtitleSelect = document.getElementById('subtitle-select');
+            const playbackSpeed = document.getElementById('playback-speed');
+            const qualitySelect = document.getElementById('quality-select');
+            const playlistSearch = document.getElementById('playlist-search');
+            const loadPlaylistBtn = document.getElementById('load-playlist-btn');
+            const playlistFile = document.getElementById('playlist-file');
+            const customTitle = document.getElementById('custom-title');
+            const customImage = document.getElementById('custom-image');
+            const customHeaders = document.getElementById('custom-headers');
+            const autoPlay = document.getElementById('auto-play');
+            const widevineSupport = document.getElementById('widevine-support');
+            const fairplaySupport = document.getElementById('fairplay-support');
+            const clearkeySupport = document.getElementById('clearkey-support');
+            const applySettings = document.getElementById('apply-settings');
+            const toggleSettings = document.getElementById('toggle-settings');
+            const settingsContent = document.getElementById('settings-content');
+            
+            // Default M3U URL
+            const defaultM3uUrl = 'https://raw.githubusercontent.com/kashmir6942/TestingTV12/refs/heads/main/conku2025_cignalplaypldt.m3u';
+            
+            // State
+            let channels = [];
+            let filteredChannels = [];
+            let currentChannelIndex = -1;
+            let customHeadersObj = {};
+            let isSettingsVisible = true;
+            
+            // Initialize player
+            initPlayer();
+            
+            function initPlayer() {
+                // Load default playlist
+                loadPlaylist(defaultM3uUrl);
+                
+                // Event listeners
+                playlistSearch.addEventListener('input', filterPlaylist);
+                loadPlaylistBtn.addEventListener('click', () => playlistFile.click());
+                playlistFile.addEventListener('change', handlePlaylistFile);
+                playbackSpeed.addEventListener('change', updatePlaybackSpeed);
+                applySettings.addEventListener('click', applyPlayerSettings);
+                toggleSettings.addEventListener('click', toggleSettingsPanel);
+                
+                // Video player events
+                videoPlayer.addEventListener('loadedmetadata', handleMetadataLoaded);
+                videoPlayer.addEventListener('emptied', resetPlayerControls);
+                
+                // Initialize settings
+                loadSettings();
+            }
+            
+            function loadPlaylist(url) {
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to load M3U file');
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        parseM3U(data);
+                        displayPlaylist();
+                    })
+                    .catch(error => {
+                        console.error('Error loading M3U:', error);
+                        playlistContainer.innerHTML = `<div class="error">Failed to load playlist: ${error.message}</div>`;
+                    });
+            }
+            
+            function parseM3U(data) {
+                const lines = data.split('\n');
+                channels = [];
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    if (line.startsWith('#EXTINF:')) {
+                        const channelInfo = line.substring(8);
+                        const commaIndex = channelInfo.indexOf(',');
+                        
+                        if (commaIndex !== -1) {
+                            const attributes = channelInfo.substring(0, commaIndex);
+                            const name = channelInfo.substring(commaIndex + 1);
+                            
+                            // Extract attributes
+                            const logoMatch = attributes.match(/tvg-logo="([^"]*)"/);
+                            const groupMatch = attributes.match(/group-title="([^"]*)"/);
+                            const idMatch = attributes.match(/tvg-id="([^"]*)"/);
+                            
+                            // Get URL
+                            const url = i + 1 < lines.length ? lines[i + 1].trim() : '';
+                            
+                            if (url && !url.startsWith('#')) {
+                                const isVOD = name.toLowerCase().includes('movie') || 
+                                             name.toLowerCase().includes('vod') || 
+                                             url.toLowerCase().includes('.mp4');
+                                
+                                channels.push({
+                                    name: name,
+                                    url: url,
+                                    logo: logoMatch ? logoMatch[1] : '',
+                                    group: groupMatch ? groupMatch[1] : 'General',
+                                    id: idMatch ? idMatch[1] : '',
+                                    type: isVOD ? 'vod' : 'live',
+                                    extinfLine: line
+                                });
+                                
+                                i++;
+                            }
+                        }
+                    }
+                }
+                
+                filteredChannels = [...channels];
+            }
+            
+            function displayPlaylist() {
+                if (filteredChannels.length === 0) {
+                    playlistContainer.innerHTML = '<div class="error">No channels found</div>';
+                    return;
+                }
+                
+                channelCount.textContent = `${filteredChannels.length} channels`;
+                
+                const playlistElement = document.createElement('ul');
+                playlistElement.className = 'playlist';
+                
+                filteredChannels.forEach((channel, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = `playlist-item ${channel.type} ${index === currentChannelIndex ? 'active' : ''}`;
+                    
+                    listItem.innerHTML = `
+                        <div class="channel-logo">
+                            ${channel.logo ? `<img src="${channel.logo}" alt="${channel.name}" onerror="this.style.display='none'">` : 
+                            '<i class="fas fa-tv"></i>'}
+                        </div>
+                        <div class="channel-info">
+                            <div class="channel-name">${channel.name}</div>
+                            <div class="channel-group">${channel.group}</div>
+                        </div>
+                    `;
+                    
+                    listItem.addEventListener('click', () => playChannel(index));
+                    playlistElement.appendChild(listItem);
+                });
+                
+                playlistContainer.innerHTML = '';
+                playlistContainer.appendChild(playlistElement);
+            }
+            
+            function filterPlaylist() {
+                const searchTerm = playlistSearch.value.toLowerCase();
+                filteredChannels = channels.filter(channel => 
+                    channel.name.toLowerCase().includes(searchTerm) || 
+                    channel.group.toLowerCase().includes(searchTerm)
+                );
+                displayPlaylist();
+            }
+            
+            function playChannel(index) {
+                if (index < 0 || index >= filteredChannels.length) return;
+                
+                currentChannelIndex = index;
+                const channel = filteredChannels[index];
+                
+                // Update UI
+                displayPlaylist();
+                
+                // Apply custom title if set
+                const displayTitle = customTitle.value || channel.name;
+                currentTitle.textContent = displayTitle;
+                currentDescription.textContent = `Group: ${channel.group} | Type: ${channel.type.toUpperCase()}`;
+                
+                // Set custom image if provided
+                if (customImage.value) {
+                    // In a real implementation, you would use this as poster
+                    console.log('Custom image:', customImage.value);
+                }
+                
+                // Prepare playback
+                preparePlayback(channel.url);
+                
+                // Show EPG info if available
+                showEPGInfo(channel);
+                
+                // Check for DRM
+                checkDRM(channel.url);
+            }
+            
+            function preparePlayback(url) {
+                // Reset player
+                videoPlayer.src = '';
+                
+                // Apply custom headers if set
+                if (Object.keys(customHeadersObj).length > 0) {
+                    // In a real implementation, you would use these headers for the fetch
+                    console.log('Custom headers:', customHeadersObj);
+                }
+                
+                // Set source with appropriate type
+                const isHLS = url.toLowerCase().includes('.m3u8');
+                const isMPD = url.toLowerCase().includes('.mpd');
+                
+                if (isHLS) {
+                    if (Hls.isSupported()) {
+                        const hls = new Hls();
+                        hls.loadSource(url);
+                        hls.attachMedia(videoPlayer);
+                    } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                        videoPlayer.src = url;
+                    }
+                } else if (isMPD) {
+                    // For DASH streams, you would use dash.js in a real implementation
+                    console.log('DASH stream detected:', url);
+                    videoPlayer.src = url;
+                } else {
+                    videoPlayer.src = url;
+                }
+                
+                // Auto-play if enabled
+                if (autoPlay.checked) {
+                    videoPlayer.play().catch(e => console.log('Autoplay prevented:', e));
+                }
+            }
+            
+            function handleMetadataLoaded() {
+                // Update audio tracks
+                updateAudioTracks();
+                
+                // Update text tracks (subtitles)
+                updateTextTracks();
+                
+                // Update quality options
+                updateQualityOptions();
+            }
+            
+            function updateAudioTracks() {
+                audioTrackSelect.innerHTML = '<option value="">Default</option>';
+                
+                // In a real implementation, you would get available audio tracks
+                // This is a simplified version
+                const audioTracks = [
+                    { id: 'en', language: 'en', label: 'English' },
+                    { id: 'es', language: 'es', label: 'Spanish' }
+                ];
+                
+                audioTracks.forEach(track => {
+                    const option = document.createElement('option');
+                    option.value = track.id;
+                    option.textContent = track.label;
+                    audioTrackSelect.appendChild(option);
+                });
+            }
+            
+            function updateTextTracks() {
+                subtitleSelect.innerHTML = '<option value="">None</option>';
+                
+                // In a real implementation, you would get available text tracks
+                const textTracks = [
+                    { id: 'en', language: 'en', label: 'English' },
+                    { id: 'es', language: 'es', label: 'Spanish' }
+                ];
+                
+                textTracks.forEach(track => {
+                    const option = document.createElement('option');
+                    option.value = track.id;
+                    option.textContent = track.label;
+                    subtitleSelect.appendChild(option);
+                });
+            }
+            
+            function updateQualityOptions() {
+                qualitySelect.innerHTML = '<option value="auto">Auto</option>';
+                
+                // In a real implementation, you would get available quality levels
+                const qualities = [
+                    { id: '360', label: '360p' },
+                    { id: '480', label: '480p' },
+                    { id: '720', label: '720p' },
+                    { id: '1080', label: '1080p' }
+                ];
+                
+                qualities.forEach(quality => {
+                    const option = document.createElement('option');
+                    option.value = quality.id;
+                    option.textContent = quality.label;
+                    qualitySelect.appendChild(option);
+                });
+            }
+            
+            function resetPlayerControls() {
+                audioTrackSelect.innerHTML = '<option value="">Default</option>';
+                subtitleSelect.innerHTML = '<option value="">None</option>';
+                qualitySelect.innerHTML = '<option value="auto">Auto</option>';
+            }
+            
+            function updatePlaybackSpeed() {
+                videoPlayer.playbackRate = parseFloat(playbackSpeed.value);
+            }
+            
+            function showEPGInfo(channel) {
+                if (channel.id) {
+                    // In a real implementation, you would fetch EPG data based on channel ID
+                    epgNow.textContent = `Current: ${channel.name} - Sample Program`;
+                    epgNext.textContent = 'Next: Upcoming Show (20:00)';
+                    epgInfo.classList.remove('hidden');
+                } else {
+                    epgInfo.classList.add('hidden');
+                }
+            }
+            
+            function checkDRM(url) {
+                // Simple DRM detection based on URL patterns
+                const hasDRM = url.includes('widevine') || 
+                              url.includes('fairplay') || 
+                              url.includes('clearkey') ||
+                              url.includes('drm');
+                
+                if (hasDRM) {
+                    drmInfo.classList.remove('hidden');
+                } else {
+                    drmInfo.classList.add('hidden');
+                }
+            }
+            
+            function handlePlaylistFile(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        parseM3U(e.target.result);
+                        displayPlaylist();
+                    };
+                    reader.readAsText(file);
+                }
+            }
+            
+            function applyPlayerSettings() {
+                // Parse custom headers
+                try {
+                    if (customHeaders.value) {
+                        customHeadersObj = JSON.parse(customHeaders.value);
+                    } else {
+                        customHeadersObj = {};
+                    }
+                } catch (e) {
+                    alert('Invalid JSON in custom headers');
+                    return;
+                }
+                
+                // Save settings to localStorage
+                saveSettings();
+                
+                alert('Settings applied successfully!');
+            }
+            
+            function toggleSettingsPanel() {
+                isSettingsVisible = !isSettingsVisible;
+                settingsContent.style.display = isSettingsVisible ? 'grid' : 'none';
+                toggleSettings.innerHTML = isSettingsVisible ? 
+                    '<i class="fas fa-cog"></i> Hide Settings' : 
+                    '<i class="fas fa-cog"></i> Show Settings';
+            }
+            
+            function saveSettings() {
+                const settings = {
+                    customTitle: customTitle.value,
+                    customImage: customImage.value,
+                    customHeaders: customHeaders.value,
+                    autoPlay: autoPlay.checked,
+                    widevine: widevineSupport.checked,
+                    fairplay: fairplaySupport.checked,
+                    clearkey: clearkeySupport.checked
+                };
+                
+                localStorage.setItem('m3uPlayerSettings', JSON.stringify(settings));
+            }
+            
+            function loadSettings() {
+                const saved = localStorage.getItem('m3uPlayerSettings');
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    customTitle.value = settings.customTitle || '';
+                    customImage.value = settings.customImage || '';
+                    customHeaders.value = settings.customHeaders || '';
+                    autoPlay.checked = settings.autoPlay !== false;
+                    widevineSupport.checked = settings.widevine !== false;
+                    fairplaySupport.checked = settings.fairplay || false;
+                    clearkeySupport.checked = settings.clearkey || false;
+                }
+            }
+            
+            // Load HLS.js if needed (in a real implementation)
+            // This is a placeholder for the actual HLS library
+            window.Hls = {
+                isSupported: () => false
+            };
+        });
+    </script>
+</body>
+</html>
