@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPTV Web App</title>
+
+<style>
+body {
+  margin:0;
+  background:#0f0f0f;
+  color:white;
+  font-family:Arial;
+}
+
+/* HEADER */
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 20px;
+  background:#141414;
+}
+
+.logo { font-size:20px; font-weight:bold; }
+
+.search-box input {
+  padding:7px;
+  border-radius:5px;
+  border:none;
+}
+
+/* CATEGORY BAR */
+.categories {
+  display:flex;
+  overflow-x:auto;
+  padding:10px;
+  background:#1c1c1c;
+}
+
+.category {
+  padding:6px 15px;
+  margin-right:8px;
+  background:#333;
+  border-radius:20px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.category.active {
+  background:#e50914;
+}
+
+/* SLIDER */
+.slider {
+  height:250px;
+  position:relative;
+  overflow:hidden;
+}
+
+.slide {
+  position:absolute;
+  width:100%;
+  height:100%;
+  background-size:cover;
+  background-position:center;
+  opacity:0;
+  transition:1s;
+}
+
+.slide.active { opacity:1; }
+
+/* GRID */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:15px;
+  padding:20px;
+}
+
+.card {
+  background:#1c1c1c;
+  border-radius:10px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:.3s;
+  position:relative;
+}
+
+.card:hover { transform:scale(1.08); }
+
+.card img {
+  width:100%;
+  height:130px;
+  object-fit:contain;
+  background:black;
+}
+
+.card-title {
+  padding:6px;
+  font-size:13px;
+  text-align:center;
+}
+
+.fav {
+  position:absolute;
+  top:5px;
+  right:5px;
+  font-size:18px;
+  cursor:pointer;
+}
+
+/* PLAYER */
+.overlay {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:black;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:999;
+}
+
+video {
+  width:90%;
+  max-width:1100px;
+}
+
+.close-btn {
+  margin-top:10px;
+  padding:8px 15px;
+  background:red;
+  border:none;
+  color:white;
+  border-radius:5px;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🔥 My IPTV</div>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search channel...">
+  </div>
+</div>
+
+<div class="categories" id="categories"></div>
+<div class="slider" id="slider"></div>
+<div class="grid" id="grid"></div>
+
+<div class="overlay" id="overlay">
+  <video id="videoPlayer" controls autoplay></video>
+  <button class="close-btn" onclick="closePlayer()">Close</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.4.0/shaka-player.compiled.js"></script>
+
+<script>
+let channels=[];
+let currentCategory="All";
+let favorites=JSON.parse(localStorage.getItem("favorites"))||[];
+
+(async function(){
+const url="https://raw.githubusercontent.com/reiyhbit/iptv/refs/heads/main/viva.m3u";
+const text=await fetch(url).then(r=>r.text());
+const lines=text.split("\n");
+
+for(let i=0;i<lines.length;i++){
+ if(lines[i].startsWith("#EXTINF")){
+  let name=lines[i].split(",")[1]||"Unknown";
+  let logoMatch=lines[i].match(/tvg-logo="([^"]+)"/);
+  let groupMatch=lines[i].match(/group-title="([^"]+)"/);
+  let logo=logoMatch?logoMatch[1]:"https://via.placeholder.com/150x120";
+  let group=groupMatch?groupMatch[1]:"Others";
+  let stream=lines[i+1]||"";
+  channels.push({name,logo,group,stream});
+ }
+}
+
+buildCategories();
+buildSlider();
+renderGrid();
+})();
+
+/* CATEGORY */
+function buildCategories(){
+let cats=["All","Favorites",...new Set(channels.map(c=>c.group))];
+let container=document.getElementById("categories");
+cats.forEach(cat=>{
+ let div=document.createElement("div");
+ div.className="category";
+ div.textContent=cat;
+ if(cat==="All") div.classList.add("active");
+ div.onclick=()=>{
+  document.querySelectorAll(".category").forEach(c=>c.classList.remove("active"));
+  div.classList.add("active");
+  currentCategory=cat;
+  renderGrid();
+ };
+ container.appendChild(div);
+});
+}
+
+/* SLIDER */
+function buildSlider(){
+let slider=document.getElementById("slider");
+channels.slice(0,5).forEach((c,i)=>{
+ let slide=document.createElement("div");
+ slide.className="slide";
+ slide.style.backgroundImage=`url('${c.logo}')`;
+ if(i===0) slide.classList.add("active");
+ slider.appendChild(slide);
+});
+let index=0;
+setInterval(()=>{
+ let slides=document.querySelectorAll(".slide");
+ slides[index].classList.remove("active");
+ index=(index+1)%slides.length;
+ slides[index].classList.add("active");
+},4000);
+}
+
+/* GRID */
+function renderGrid(){
+let grid=document.getElementById("grid");
+grid.innerHTML="";
+let search=document.getElementById("searchInput").value.toLowerCase();
+
+channels
+.filter(c=>{
+ if(currentCategory==="Favorites") return favorites.includes(c.name);
+ if(currentCategory==="All") return true;
+ return c.group===currentCategory;
+})
+.filter(c=>c.name.toLowerCase().includes(search))
+.forEach(c=>{
+ let card=document.createElement("div");
+ card.className="card";
+ card.innerHTML=`
+  <div class="fav">${favorites.includes(c.name)?"⭐":"☆"}</div>
+  <img src="${c.logo}">
+  <div class="card-title">${c.name}</div>
+ `;
+ card.querySelector(".fav").onclick=(e)=>{
+  e.stopPropagation();
+  toggleFavorite(c.name);
+ };
+ card.onclick=()=>playChannel(c.stream,c.name);
+ grid.appendChild(card);
+});
+}
+
+/* SEARCH */
+document.getElementById("searchInput").oninput=renderGrid;
+
+/* FAVORITES */
+function toggleFavorite(name){
+ if(favorites.includes(name)){
+  favorites=favorites.filter(f=>f!==name);
+ } else favorites.push(name);
+ localStorage.setItem("favorites",JSON.stringify(favorites));
+ renderGrid();
+}
+
+/* PLAYER */
+function playChannel(url,name){
+ localStorage.setItem("lastWatched",name);
+ let overlay=document.getElementById("overlay");
+ let video=document.getElementById("videoPlayer");
+ overlay.style.display="flex";
+ video.requestFullscreen().catch(()=>{});
+ if(Hls.isSupported()){
+  let hls=new Hls();
+  hls.loadSource(url);
+  hls.attachMedia(video);
+ } else if(video.canPlayType("application/vnd.apple.mpegurl")){
+  video.src=url;
+ } else {
+  let player=new shaka.Player(video);
+  player.load(url);
+ }
+}
+
+function closePlayer(){
+ let video=document.getElementById("videoPlayer");
+ video.pause();
+ video.src="";
+ document.getElementById("overlay").style.display="none";
+}
+</script>
+
+</body>
+</html>
