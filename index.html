@@ -166,9 +166,10 @@ video {
 let channels=[];
 let currentCategory="All";
 let favorites=JSON.parse(localStorage.getItem("favorites"))||[];
+const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
 
 (async function(){
-const url="https://raw.githubusercontent.com/reiyhbit/iptv/refs/heads/main/viva.m3u";
+const url = CORS_PROXY + "https://raw.githubusercontent.com/reiyhbit/iptv/refs/heads/main/viva.m3u";
 const text=await fetch(url).then(r=>r.text());
 const lines=text.split("\n");
 
@@ -276,15 +277,19 @@ function playChannel(url,name){
  let video=document.getElementById("videoPlayer");
  overlay.style.display="flex";
  video.requestFullscreen().catch(()=>{});
+ 
+ // Use CORS proxy for stream if needed
+ let streamUrl = url.startsWith('http') ? CORS_PROXY + url : url;
+ 
  if(Hls.isSupported()){
   let hls=new Hls();
-  hls.loadSource(url);
+  hls.loadSource(streamUrl);
   hls.attachMedia(video);
  } else if(video.canPlayType("application/vnd.apple.mpegurl")){
-  video.src=url;
+  video.src=streamUrl;
  } else {
   let player=new shaka.Player(video);
-  player.load(url);
+  player.load(streamUrl);
  }
 }
 
