@@ -1,110 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Upgraded IPTV Web App</title>
+<title>Reiyh IPTV</title>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
 
 <style>
-body {
+body{
   margin:0;
-  background:#0f0f0f;
+  background:#111;
+  font-family:Arial;
   color:white;
-  font-family:Arial, sans-serif;
 }
 
-/* HEADER */
-.header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:15px 20px;
-  background:#141414;
-}
-.logo { font-size:20px; font-weight:bold; }
-.search-box input {
-  padding:7px;
-  border-radius:5px;
-  border:none;
-  width:200px;
+header{
+  padding:15px;
+  text-align:center;
+  font-size:20px;
+  background:#000;
 }
 
-/* CATEGORY BAR */
-.categories {
-  display:flex;
-  overflow-x:auto;
-  padding:10px;
-  background:#1c1c1c;
-}
-.category {
-  padding:6px 15px;
-  margin-right:8px;
-  background:#333;
-  border-radius:20px;
-  cursor:pointer;
-  white-space:nowrap;
-}
-.category.active { background:#e50914; }
-
-/* SLIDER */
-.slider {
-  height:250px;
-  position:relative;
-  overflow:hidden;
-}
-.slide {
-  position:absolute;
-  width:100%;
-  height:100%;
-  background-size:cover;
-  background-position:center;
-  opacity:0;
-  transition:1s;
-}
-.slide.active { opacity:1; }
-
-/* GRID */
-.grid {
+.grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
   gap:15px;
-  padding:20px;
+  padding:15px;
 }
-.card {
-  background:#1c1c1c;
+
+.channel{
+  background:#1a1a1a;
   border-radius:10px;
   overflow:hidden;
   cursor:pointer;
-  transition:.3s;
-  position:relative;
-}
-.card:hover { transform:scale(1.08); }
-.card img {
-  width:100%;
-  height:130px;
-  object-fit:contain;
-  background:black;
-}
-.card-title {
-  padding:6px;
-  font-size:13px;
-  text-align:center;
-}
-.fav {
-  position:absolute;
-  top:5px;
-  right:5px;
-  font-size:18px;
-  cursor:pointer;
+  transition:0.2s;
 }
 
-/* PLAYER OVERLAY */
-.overlay {
-  position:fixed;
-  top:0;
-  left:0;
+.channel:hover{
+  transform:scale(1.05);
+}
+
+.channel img{
   width:100%;
-  height:100%;
+  height:100px;
+  object-fit:contain;
+  background:#000;
+}
+
+.channel-name{
+  text-align:center;
+  padding:5px;
+  font-size:12px;
+}
+
+#overlay{
+  position:fixed;
+  inset:0;
   background:black;
   display:none;
   justify-content:center;
@@ -113,253 +66,145 @@ body {
   z-index:999;
 }
 
-/* VIDEO */
-video {
-  width:90%;
-  max-width:1100px;
+video{
+  width:100%;
+  height:100%;
+  background:black;
 }
 
-/* CLOSE BUTTON */
-.close-btn {
-  margin-top:10px;
-  padding:8px 15px;
+.closeBtn{
+  position:absolute;
+  top:20px;
+  right:20px;
   background:red;
   border:none;
+  padding:10px;
   color:white;
-  border-radius:5px;
   cursor:pointer;
-}
-
-/* LOADER */
-.loader {
-  position:absolute;
-  width:60px;
-  height:60px;
-  border:6px solid #444;
-  border-top:6px solid #e50914;
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-  display:none;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
-
-/* QUALITY SELECT */
-.quality-select {
-  position:absolute;
-  bottom:70px;
-  right:20px;
-  background:#111;
-  padding:5px;
-  border-radius:5px;
-  display:none;
-}
-.quality-select select {
-  background:#222;
-  color:white;
-  border:none;
-  padding:5px;
 }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="logo">BivaReiyh</div>
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search channel...">
-  </div>
+<header>📺 Reiyh IPTV</header>
+
+<div class="grid" id="playlist"></div>
+
+<div id="overlay">
+  <button class="closeBtn" onclick="closePlayer()">X</button>
+  <video id="videoPlayer" controls autoplay></video>
 </div>
-
-<div class="categories" id="categories"></div>
-<div class="slider" id="slider"></div>
-<div class="grid" id="grid"></div>
-
-<div class="overlay" id="overlay">
-  <div class="loader" id="loader"></div>
-  <video id="videoPlayer" controls autoplay playsinline></video>
-  <div class="quality-select" id="qualityBox">
-    <select id="qualitySelect"></select>
-  </div>
-  <button class="close-btn" onclick="closePlayer()">Close</button>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.4.0/shaka-player.compiled.js"></script>
 
 <script>
-let channels=[];
-let currentCategory="All";
-let favorites=JSON.parse(localStorage.getItem("favorites"))||[];
-let hlsInstance=null;
-let shakaInstance=null;
-let currentUrl="";
 
-const video=document.getElementById("videoPlayer");
-const loader=document.getElementById("loader");
-const qualityBox=document.getElementById("qualityBox");
-const qualitySelect=document.getElementById("qualitySelect");
+const playlistURL = "https://raw.githubusercontent.com/reiyhbit/iptv/main/v"; // palitan kung needed
 
-/* LOAD M3U */
-(async function(){
-const url="https://raw.githubusercontent.com/reiyhbit/iptv/refs/heads/main/viva.m3u";
-const text=await fetch(url).then(r=>r.text());
-const lines=text.split("\n");
+let hlsInstance = null;
+let shakaInstance = null;
 
-for(let i=0;i<lines.length;i++){
- if(lines[i].startsWith("#EXTINF")){
-  let name=lines[i].split(",")[1]||"Unknown";
-  let logoMatch=lines[i].match(/tvg-logo="([^"]+)"/);
-  let groupMatch=lines[i].match(/group-title="([^"]+)"/);
-  let logo=logoMatch?logoMatch[1]:"https://via.placeholder.com/150x120";
-  let group=groupMatch?groupMatch[1]:"Others";
-  let stream=lines[i+1]||"";
-  channels.push({name,logo,group,stream});
- }
+async function loadPlaylist(){
+  try{
+    const response = await fetch(playlistURL + "?t=" + Date.now());
+    const text = await response.text();
+    parseM3U(text);
+  }catch(err){
+    alert("Failed to load playlist.");
+    console.error(err);
+  }
 }
-buildCategories();
-buildSlider();
-renderGrid();
-})();
 
-/* PLAYER CORE */
+function parseM3U(data){
+  const lines = data.split("\n");
+  const container = document.getElementById("playlist");
+  container.innerHTML = "";
+
+  for(let i=0;i<lines.length;i++){
+    if(lines[i].startsWith("#EXTINF")){
+      const info = lines[i];
+      const url = lines[i+1];
+
+      const nameMatch = info.match(/,(.*)/);
+      const logoMatch = info.match(/tvg-logo="(.*?)"/);
+
+      const name = nameMatch ? nameMatch[1].trim() : "No Name";
+      const logo = logoMatch ? logoMatch[1] : "https://via.placeholder.com/150?text=No+Logo";
+
+      const div = document.createElement("div");
+      div.className = "channel";
+      div.onclick = () => playChannel(url,name);
+
+      div.innerHTML = `
+        <img src="${logo}" onerror="this.src='https://via.placeholder.com/150?text=No+Logo'">
+        <div class="channel-name">${name}</div>
+      `;
+
+      container.appendChild(div);
+    }
+  }
+}
+
 function playChannel(url,name){
- currentUrl=url;
- document.getElementById("overlay").style.display="flex";
- showLoader(true);
- destroyPlayers();
- video.pause();
- video.removeAttribute("src");
- video.load();
 
- const isHls = url.includes(".m3u8") || url.includes("playlist") || url.includes("m3u");
- const isDash = url.includes(".mpd");
- const isMp4 = url.includes(".mp4");
+  let video = document.getElementById("videoPlayer");
+  document.getElementById("overlay").style.display="flex";
 
- if(isHls){
-   if(Hls.isSupported()){
-     hlsInstance=new Hls({
-       enableWorker:true,
-       lowLatencyMode:true,
-       backBufferLength:90
-     });
+  if(hlsInstance){
+    hlsInstance.destroy();
+    hlsInstance=null;
+  }
 
-     hlsInstance.loadSource(url);
-     hlsInstance.attachMedia(video);
+  if(shakaInstance){
+    shakaInstance.destroy();
+    shakaInstance=null;
+  }
 
-     hlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>{
-       video.play().catch(()=>{});
-       buildHlsQualityMenu();
-       showLoader(false);
-     });
+  video.pause();
+  video.removeAttribute("src");
+  video.load();
 
-     hlsInstance.on(Hls.Events.ERROR,(event,data)=>{
-       console.log("HLS Error:",data);
-       if(data.fatal){
-         if(data.type===Hls.ErrorTypes.NETWORK_ERROR){
-           hlsInstance.startLoad();
-         }else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){
-           hlsInstance.recoverMediaError();
-         }else{
-           destroyPlayers();
-         }
-       }
-     });
+  if(url.includes(".m3u8")){
+    if(Hls.isSupported()){
+      hlsInstance = new Hls();
+      hlsInstance.loadSource(url);
+      hlsInstance.attachMedia(video);
+    }else{
+      video.src = url;
+    }
+  }
+  else if(url.includes(".mpd")){
+    shakaInstance = new shaka.Player(video);
+    shakaInstance.load(url).catch(e=>console.log(e));
+  }
+  else{
+    video.src = url;
+  }
 
-   }else if(video.canPlayType("application/vnd.apple.mpegurl")){
-     video.src=url;
-     video.addEventListener("loadedmetadata",()=>{
-       video.play();
-       showLoader(false);
-     });
-   }
- }
- else if(isDash){
-   shakaInstance=new shaka.Player(video);
-   shakaInstance.load(url).then(()=>{
-     video.play();
-     buildShakaQualityMenu();
-     showLoader(false);
-   }).catch(e=>console.log(e));
- }
- else if(isMp4){
-   video.src=url;
-   video.play();
-   showLoader(false);
- }
- else{
-   video.src=url;
-   video.play();
-   showLoader(false);
- }
-
- video.requestFullscreen().catch(()=>{});
+  video.play().catch(()=>{});
+  video.requestFullscreen().catch(()=>{});
 }
 
-/* DESTROY */
-function destroyPlayers(){
- if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}
- if(shakaInstance){shakaInstance.destroy();shakaInstance=null;}
- qualityBox.style.display="none";
-}
-
-/* LOADER */
-function showLoader(v){loader.style.display=v?"block":"none";}
-
-/* QUALITY */
-function buildHlsQualityMenu(){
- qualityBox.style.display="block";
- qualitySelect.innerHTML="";
- qualitySelect.innerHTML="<option value='-1'>Auto</option>";
- hlsInstance.levels.forEach((level,i)=>{
-   let opt=document.createElement("option");
-   opt.value=i;
-   opt.text=level.height+"p";
-   qualitySelect.appendChild(opt);
- });
- qualitySelect.onchange=function(){
-   hlsInstance.currentLevel=parseInt(this.value);
- };
-}
-
-function buildShakaQualityMenu(){
- qualityBox.style.display="block";
- qualitySelect.innerHTML="";
- let tracks=shakaInstance.getVariantTracks();
- tracks.forEach(track=>{
-   if(track.height){
-     let opt=document.createElement("option");
-     opt.value=track.id;
-     opt.text=track.height+"p";
-     qualitySelect.appendChild(opt);
-   }
- });
- qualitySelect.onchange=function(){
-   shakaInstance.selectVariantTrack(
-     tracks.find(t=>t.id==this.value),true
-   );
- };
-}
-
-/* RESUME */
-video.addEventListener("timeupdate",()=>{
- if(currentUrl){
-   localStorage.setItem("resume_"+currentUrl,video.currentTime);
- }
-});
-video.addEventListener("loadedmetadata",()=>{
- let resumeTime=localStorage.getItem("resume_"+currentUrl);
- if(resumeTime) video.currentTime=resumeTime;
-});
-
-/* CLOSE */
 function closePlayer(){
- destroyPlayers();
- video.pause();
- video.removeAttribute("src");
- video.load();
- document.getElementById("overlay").style.display="none";
-}
-</script>
+  let video = document.getElementById("videoPlayer");
 
+  if(hlsInstance){
+    hlsInstance.destroy();
+    hlsInstance=null;
+  }
+
+  if(shakaInstance){
+    shakaInstance.destroy();
+    shakaInstance=null;
+  }
+
+  video.pause();
+  video.removeAttribute("src");
+  video.load();
+
+  document.getElementById("overlay").style.display="none";
+}
+
+loadPlaylist();
+
+</script>
 </body>
 </html>
