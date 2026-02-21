@@ -1,16 +1,17 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Upgraded IPTV Web App</title>
+<title>IPTV Web App</title>
 
 <style>
 body {
   margin:0;
   background:#0f0f0f;
   color:white;
-  font-family:Arial, sans-serif;
+  font-family:Arial;
 }
 
 /* HEADER */
@@ -21,12 +22,13 @@ body {
   padding:15px 20px;
   background:#141414;
 }
+
 .logo { font-size:20px; font-weight:bold; }
+
 .search-box input {
   padding:7px;
   border-radius:5px;
   border:none;
-  width:200px;
 }
 
 /* CATEGORY BAR */
@@ -36,6 +38,7 @@ body {
   padding:10px;
   background:#1c1c1c;
 }
+
 .category {
   padding:6px 15px;
   margin-right:8px;
@@ -44,7 +47,10 @@ body {
   cursor:pointer;
   white-space:nowrap;
 }
-.category.active { background:#e50914; }
+
+.category.active {
+  background:#e50914;
+}
 
 /* SLIDER */
 .slider {
@@ -52,6 +58,7 @@ body {
   position:relative;
   overflow:hidden;
 }
+
 .slide {
   position:absolute;
   width:100%;
@@ -61,6 +68,7 @@ body {
   opacity:0;
   transition:1s;
 }
+
 .slide.active { opacity:1; }
 
 /* GRID */
@@ -70,6 +78,7 @@ body {
   gap:15px;
   padding:20px;
 }
+
 .card {
   background:#1c1c1c;
   border-radius:10px;
@@ -78,18 +87,22 @@ body {
   transition:.3s;
   position:relative;
 }
+
 .card:hover { transform:scale(1.08); }
+
 .card img {
   width:100%;
   height:130px;
   object-fit:contain;
   background:black;
 }
+
 .card-title {
   padding:6px;
   font-size:13px;
   text-align:center;
 }
+
 .fav {
   position:absolute;
   top:5px;
@@ -98,7 +111,7 @@ body {
   cursor:pointer;
 }
 
-/* PLAYER OVERLAY */
+/* PLAYER */
 .overlay {
   position:fixed;
   top:0;
@@ -113,13 +126,11 @@ body {
   z-index:999;
 }
 
-/* VIDEO */
 video {
   width:90%;
   max-width:1100px;
 }
 
-/* CLOSE BUTTON */
 .close-btn {
   margin-top:10px;
   padding:8px 15px;
@@ -128,36 +139,6 @@ video {
   color:white;
   border-radius:5px;
   cursor:pointer;
-}
-
-/* LOADER */
-.loader {
-  position:absolute;
-  width:60px;
-  height:60px;
-  border:6px solid #444;
-  border-top:6px solid #e50914;
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-  display:none;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
-
-/* QUALITY SELECT */
-.quality-select {
-  position:absolute;
-  bottom:70px;
-  right:20px;
-  background:#111;
-  padding:5px;
-  border-radius:5px;
-  display:none;
-}
-.quality-select select {
-  background:#222;
-  color:white;
-  border:none;
-  padding:5px;
 }
 </style>
 </head>
@@ -175,11 +156,7 @@ video {
 <div class="grid" id="grid"></div>
 
 <div class="overlay" id="overlay">
-  <div class="loader" id="loader"></div>
   <video id="videoPlayer" controls autoplay></video>
-  <div class="quality-select" id="qualityBox">
-    <select id="qualitySelect"></select>
-  </div>
   <button class="close-btn" onclick="closePlayer()">Close</button>
 </div>
 
@@ -190,14 +167,6 @@ video {
 let channels=[];
 let currentCategory="All";
 let favorites=JSON.parse(localStorage.getItem("favorites"))||[];
-let hlsInstance = null;
-let shakaInstance = null;
-let currentUrl = "";
-
-const video = document.getElementById("videoPlayer");
-const loader = document.getElementById("loader");
-const qualityBox = document.getElementById("qualityBox");
-const qualitySelect = document.getElementById("qualitySelect");
 
 (async function(){
 const url="https://raw.githubusercontent.com/reiyhbit/iptv/refs/heads/main/viva.m3u";
@@ -301,109 +270,30 @@ function toggleFavorite(name){
  renderGrid();
 }
 
-/* PLAYER HELPERS */
-function showLoader(show){ loader.style.display = show ? "block" : "none"; }
-
-function destroyPlayers(){
-  if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
-  if(shakaInstance){ shakaInstance.destroy(); shakaInstance=null; }
-  qualityBox.style.display="none";
-}
-
-/* PLAY CHANNEL */
+/* PLAYER */
 function playChannel(url,name){
-  currentUrl = url;
-  localStorage.setItem("lastWatched", name);
-  document.getElementById("overlay").style.display="flex";
-  video.controls = true;
-  showLoader(true);
-
-  destroyPlayers();
-  video.pause();
-  video.removeAttribute("src");
-  video.load();
-
-  if(url.includes(".mp4")){
-    video.src = url;
-    video.play();
-    showLoader(false);
-
-  } else if(url.includes(".m3u8")){
-    if(Hls.isSupported()){
-      hlsInstance = new Hls({ enableWorker:true });
-      hlsInstance.loadSource(url);
-      hlsInstance.attachMedia(video);
-
-      hlsInstance.on(Hls.Events.MANIFEST_PARSED, function(){
-        buildHlsQualityMenu();
-        showLoader(false);
-      });
-
-    } else if(video.canPlayType("application/vnd.apple.mpegurl")){
-      video.src = url;
-      showLoader(false);
-    }
-
-  } else if(url.includes(".mpd")){
-    shakaInstance = new shaka.Player(video);
-    shakaInstance.load(url).then(()=>{
-      buildShakaQualityMenu();
-      showLoader(false);
-    }).catch(e=>console.error(e));
-  }
-
-  video.requestFullscreen().catch(()=>{});
+ localStorage.setItem("lastWatched",name);
+ let overlay=document.getElementById("overlay");
+ let video=document.getElementById("videoPlayer");
+ overlay.style.display="flex";
+ video.requestFullscreen().catch(()=>{});
+ if(Hls.isSupported()){
+  let hls=new Hls();
+  hls.loadSource(url);
+  hls.attachMedia(video);
+ } else if(video.canPlayType("application/vnd.apple.mpegurl")){
+  video.src=url;
+ } else {
+  let player=new shaka.Player(video);
+  player.load(url);
+ }
 }
 
-/* HLS QUALITY MENU */
-function buildHlsQualityMenu(){
-  qualityBox.style.display="block";
-  qualitySelect.innerHTML="";
-  hlsInstance.levels.forEach((level,i)=>{
-    let option=document.createElement("option");
-    option.value=i;
-    option.text=`${level.height}p`;
-    qualitySelect.appendChild(option);
-  });
-  qualitySelect.onchange=function(){ hlsInstance.currentLevel=this.value; }
-}
-
-/* SHAKA QUALITY MENU */
-function buildShakaQualityMenu(){
-  qualityBox.style.display="block";
-  qualitySelect.innerHTML="";
-  let tracks=shakaInstance.getVariantTracks();
-  tracks.forEach(track=>{
-    if(track.height){
-      let option=document.createElement("option");
-      option.value=track.id;
-      option.text=`${track.height}p`;
-      qualitySelect.appendChild(option);
-    }
-  });
-  qualitySelect.onchange=function(){
-    shakaInstance.selectVariantTrack(
-      tracks.find(t=>t.id==this.value), true
-    );
-  };
-}
-
-/* RESUME PLAYBACK */
-video.addEventListener("timeupdate", ()=>{
-  if(currentUrl) localStorage.setItem("resume_"+currentUrl, video.currentTime);
-});
-video.addEventListener("loadedmetadata", ()=>{
-  let resumeTime = localStorage.getItem("resume_"+currentUrl);
-  if(resumeTime) video.currentTime = resumeTime;
-});
-
-/* CLOSE PLAYER */
 function closePlayer(){
-  destroyPlayers();
-  video.pause();
-  video.removeAttribute("src");
-  video.load();
-  document.getElementById("overlay").style.display="none";
+ let video=document.getElementById("videoPlayer");
+ video.pause();
+ video.src="";
+ document.getElementById("overlay").style.display="none";
 }
 </script>
 
