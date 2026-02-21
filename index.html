@@ -125,9 +125,102 @@ body {
   z-index:999;
 }
 
-video {
+.video-container {
   width:90%;
   max-width:1100px;
+  position:relative;
+  background:#000;
+}
+
+video {
+  width:100%;
+  display:block;
+}
+
+/* Theater Mode */
+.theater-mode .video-container {
+  max-width:100%;
+  width:100%;
+}
+
+.theater-mode .close-btn {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+}
+
+/* Player Controls Overlay */
+.player-controls {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  background:rgba(0,0,0,0.8);
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  opacity:0;
+  transition:0.3s;
+}
+
+.video-container:hover .player-controls {
+  opacity:1;
+}
+
+.quality-btn, .theater-btn {
+  background:#e50914;
+  color:white;
+  border:none;
+  padding:5px 10px;
+  border-radius:3px;
+  cursor:pointer;
+  margin:0 2px;
+  font-size:12px;
+}
+
+.quality-menu {
+  position:absolute;
+  bottom:40px;
+  left:10px;
+  background:#141414;
+  border-radius:5px;
+  display:none;
+  flex-direction:column;
+  min-width:100px;
+  border:1px solid #333;
+}
+
+.quality-menu.show {
+  display:flex;
+}
+
+.quality-option {
+  padding:8px 12px;
+  cursor:pointer;
+  font-size:12px;
+  transition:0.2s;
+}
+
+.quality-option:hover {
+  background:#e50914;
+}
+
+.quality-option.active {
+  background:#e50914;
+  font-weight:bold;
+}
+
+.resume-badge {
+  background:#e50914;
+  color:white;
+  padding:3px 8px;
+  border-radius:15px;
+  font-size:11px;
+  position:absolute;
+  top:5px;
+  left:5px;
+  z-index:2;
 }
 
 .close-btn {
@@ -138,6 +231,20 @@ video {
   color:white;
   border-radius:5px;
   cursor:pointer;
+}
+
+.buffering-indicator {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(0,0,0,0.7);
+  color:white;
+  padding:5px 15px;
+  border-radius:20px;
+  font-size:12px;
+  display:none;
+  z-index:10;
 }
 </style>
 </head>
@@ -155,7 +262,24 @@ video {
 <div class="grid" id="grid"></div>
 
 <div class="overlay" id="overlay">
-  <video id="videoPlayer" controls autoplay></video>
+  <div class="video-container">
+    <video id="videoPlayer" controls autoplay preload="auto"></video>
+    <div class="buffering-indicator" id="bufferingIndicator">Buffering ⚡</div>
+    <div class="player-controls">
+      <div style="position:relative">
+        <button class="quality-btn" onclick="toggleQualityMenu()">⚙️ Auto</button>
+        <div class="quality-menu" id="qualityMenu">
+          <div class="quality-option active" onclick="setQuality('auto')">Auto</div>
+          <div class="quality-option" onclick="setQuality('1080p')">1080p</div>
+          <div class="quality-option" onclick="setQuality('720p')">720p</div>
+          <div class="quality-option" onclick="setQuality('480p')">480p</div>
+        </div>
+      </div>
+      <div>
+        <button class="theater-btn" onclick="toggleTheaterMode()">🌙 Theater</button>
+      </div>
+    </div>
+  </div>
   <button class="close-btn" onclick="closePlayer()">Close</button>
 </div>
 
@@ -166,6 +290,10 @@ video {
 let channels=[];
 let currentCategory="All";
 let favorites=JSON.parse(localStorage.getItem("favorites"))||[];
+let hlsInstance = null;
+let currentVideoUrl = "";
+let currentVideoName = "";
+let bufferingTimer = null;
 
 (async function(){
 const url="https://raw.githubusercontent.com/reiyhbit/iptv/refs/heads/main/viva.m3u";
@@ -187,6 +315,7 @@ for(let i=0;i<lines.length;i++){
 buildCategories();
 buildSlider();
 renderGrid();
+checkResumePosition();
 })();
 
 /* CATEGORY */
@@ -243,7 +372,13 @@ channels
 .forEach(c=>{
  let card=document.createElement("div");
  card.className="card";
+ 
+ // Check if this channel has resume position
+ let resumePos = localStorage.getItem(`resume_${c.name}`);
+ let resumeBadge = resumePos ? '<div class="resume-badge">▶️ Resume</div>' : '';
+ 
  card.innerHTML=`
+  ${resumeBadge}
   <div class="fav">${favorites.includes(c.name)?"⭐":"☆"}</div>
   <img src="${c.logo}">
   <div class="card-title">${c.name}</div>
@@ -269,13 +404,77 @@ function toggleFavorite(name){
  renderGrid();
 }
 
-/* PLAYER - Updated with MP4 support */
+/* BUFFERING INDICATOR */
+function setupBufferingListener(video) {
+  video.addEventListener('waiting', () => {
+    document.getElementById('bufferingIndicator').style.display = 'block';
+  });
+  
+  video.addEventListener('playing', () => {
+    document.getElementById('bufferingIndicator').style.display = 'none';
+  });
+  
+  video.addEventListener('canplay', () => {
+    document.getElementById('bufferingIndicator').style.display = 'none';
+  });
+}
+
+/* PLAYER - Updated with new features */
 function playChannel(url,name){
  localStorage.setItem("lastWatched",name);
+ currentVideoUrl = url;
+ currentVideoName = name;
+ 
  let overlay=document.getElementById("overlay");
  let video=document.getElementById("videoPlayer");
+ 
+ // Clean up previous HLS instance
+ if (hlsInstance) {
+   hlsInstance.destroy();
+   hlsInstance = null;
+ }
+ 
  overlay.style.display="flex";
- video.requestFullscreen().catch(()=>{});
+ 
+ // Add theater mode class if it was enabled
+ if (localStorage.getItem('theaterMode') === 'true') {
+   overlay.classList.add('theater-mode');
+ }
+ 
+ setupBufferingListener(video);
+ 
+ // Faster loading with preload
+ video.preload = 'auto';
+ 
+ // Check if there's a saved position
+ let savedTime = localStorage.getItem(`resume_${name}`);
+ if (savedTime) {
+   video.addEventListener('loadedmetadata', function onMetadata() {
+     video.currentTime = parseFloat(savedTime);
+     video.removeEventListener('loadedmetadata', onMetadata);
+   });
+ }
+ 
+ // Save position periodically
+ video.addEventListener('timeupdate', () => {
+   if (video.currentTime > 30) { // Save after 30 seconds
+     localStorage.setItem(`resume_${name}`, video.currentTime);
+   }
+ });
+ 
+ // Auto quality selection based on network speed
+ if (navigator.connection) {
+   let connection = navigator.connection;
+   let effectiveType = connection.effectiveType;
+   
+   if (effectiveType === 'slow-2g' || effectiveType === '2g') {
+     setQuality('480p');
+   } else if (effectiveType === '3g') {
+     setQuality('720p');
+   } else {
+     setQuality('auto');
+   }
+ }
  
  // Check if it's an MP4 file
  let isMp4 = url.toLowerCase().includes('.mp4') || 
@@ -289,53 +488,132 @@ function playChannel(url,name){
              url.match(/\.m3u8(\?.*)?$/i);
  
  if (isHls) {
-   // HLS playback
+   // HLS playback with quality control
    if (Hls.isSupported()) {
-     let hls = new Hls();
+     let hls = new Hls({
+       maxBufferLength: 60, // Faster buffering
+       maxMaxBufferLength: 120,
+       startLevel: -1 // Auto quality
+     });
+     
      hls.loadSource(url);
      hls.attachMedia(video);
+     hlsInstance = hls;
+     
+     // Quality levels available
+     hls.on(Hls.Events.MANIFEST_PARSED, function() {
+       let qualityMenu = document.getElementById('qualityMenu');
+       let levels = hls.levels;
+       
+       // Clear existing options except Auto
+       while (qualityMenu.children.length > 1) {
+         qualityMenu.removeChild(qualityMenu.lastChild);
+       }
+       
+       levels.forEach((level, index) => {
+         let height = level.height;
+         let option = document.createElement('div');
+         option.className = 'quality-option';
+         option.textContent = height + 'p';
+         option.onclick = () => {
+           setHlsQuality(index);
+           document.querySelectorAll('.quality-option').forEach(opt => opt.classList.remove('active'));
+           option.classList.add('active');
+         };
+         qualityMenu.appendChild(option);
+       });
+     });
+     
    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
      video.src = url;
-   } else {
-     // Fallback to Shaka for HLS
-     try {
-       let player = new shaka.Player(video);
-       player.load(url);
-     } catch (e) {
-       console.error('HLS playback failed, trying direct source:', e);
-       video.src = url;
-     }
    }
  } else if (isMp4) {
    // MP4 or direct video file playback
    video.src = url;
    video.load();
  } else {
-   // Unknown format - try direct source first
    video.src = url;
    video.load();
-   
-   // If direct source fails, try Shaka as fallback
-   setTimeout(() => {
-     if (video.readyState === 0) {
-       console.log('Direct source failed, trying Shaka player...');
-       try {
-         let player = new shaka.Player(video);
-         player.load(url);
-       } catch (e) {
-         console.error('All playback methods failed:', e);
-       }
-     }
-   }, 1000);
  }
+ 
+ video.requestFullscreen().catch(()=>{});
+}
+
+/* QUALITY CONTROL */
+function toggleQualityMenu() {
+  document.getElementById('qualityMenu').classList.toggle('show');
+}
+
+function setQuality(level) {
+  document.getElementById('qualityMenu').classList.remove('show');
+  
+  if (hlsInstance) {
+    if (level === 'auto') {
+      hlsInstance.currentLevel = -1;
+    } else if (level === '1080p') {
+      hlsInstance.currentLevel = hlsInstance.levels.findIndex(l => l.height === 1080);
+    } else if (level === '720p') {
+      hlsInstance.currentLevel = hlsInstance.levels.findIndex(l => l.height === 720);
+    } else if (level === '480p') {
+      hlsInstance.currentLevel = hlsInstance.levels.findIndex(l => l.height === 480);
+    }
+  }
+}
+
+function setHlsQuality(level) {
+  if (hlsInstance) {
+    hlsInstance.currentLevel = level;
+  }
+}
+
+/* THEATER MODE */
+function toggleTheaterMode() {
+  let overlay = document.getElementById('overlay');
+  overlay.classList.toggle('theater-mode');
+  let theaterMode = overlay.classList.contains('theater-mode');
+  localStorage.setItem('theaterMode', theaterMode);
+  
+  // Update button text
+  let btn = document.querySelector('.theater-btn');
+  btn.textContent = theaterMode ? '🌙 Normal' : '🌙 Theater';
+}
+
+/* RESUME POSITION */
+function checkResumePosition() {
+  let lastWatched = localStorage.getItem('lastWatched');
+  if (lastWatched) {
+    console.log('Last watched:', lastWatched);
+  }
 }
 
 function closePlayer(){
  let video=document.getElementById("videoPlayer");
+ 
+ // Save final position before closing
+ if (currentVideoName && video.currentTime > 30) {
+   localStorage.setItem(`resume_${currentVideoName}`, video.currentTime);
+ }
+ 
  video.pause();
  video.src="";
- document.getElementById("overlay").style.display="none";
+ document.getElementById('qualityMenu').classList.remove('show');
+ document.getElementById('overlay').style.display="none";
+ 
+ // Clean up HLS
+ if (hlsInstance) {
+   hlsInstance.destroy();
+   hlsInstance = null;
+ }
 }
+
+// Close quality menu when clicking outside
+document.addEventListener('click', function(event) {
+  let menu = document.getElementById('qualityMenu');
+  let btn = document.querySelector('.quality-btn');
+  if (!btn.contains(event.target) && !menu.contains(event.target)) {
+    menu.classList.remove('show');
+  }
+});
 </script>
 
 </body>
