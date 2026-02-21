@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,25 +7,139 @@
 <title>IPTV Web App</title>
 
 <style>
-body{margin:0;background:#0f0f0f;color:white;font-family:Arial;}
-.header{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;background:#141414;}
-.logo{font-size:20px;font-weight:bold;}
-.search-box input{padding:7px;border-radius:5px;border:none;}
-.categories{display:flex;overflow-x:auto;padding:10px;background:#1c1c1c;}
-.category{padding:6px 15px;margin-right:8px;background:#333;border-radius:20px;cursor:pointer;white-space:nowrap;}
-.category.active{background:#e50914;}
-.slider{height:250px;position:relative;overflow:hidden;}
-.slide{position:absolute;width:100%;height:100%;background-size:cover;background-position:center;opacity:0;transition:1s;}
-.slide.active{opacity:1;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:15px;padding:20px;}
-.card{background:#1c1c1c;border-radius:10px;overflow:hidden;cursor:pointer;transition:.3s;position:relative;}
-.card:hover{transform:scale(1.08);}
-.card img{width:100%;height:130px;object-fit:contain;background:black;}
-.card-title{padding:6px;font-size:13px;text-align:center;}
-.fav{position:absolute;top:5px;right:5px;font-size:18px;cursor:pointer;}
-.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:black;display:none;justify-content:center;align-items:center;flex-direction:column;z-index:999;}
-video{width:90%;max-width:1100px;}
-.close-btn{margin-top:10px;padding:8px 15px;background:red;border:none;color:white;border-radius:5px;cursor:pointer;}
+body {
+  margin:0;
+  background:#0f0f0f;
+  color:white;
+  font-family:Arial;
+}
+
+/* HEADER */
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 20px;
+  background:#141414;
+}
+
+.logo { font-size:20px; font-weight:bold; }
+
+.search-box input {
+  padding:7px;
+  border-radius:5px;
+  border:none;
+}
+
+/* CATEGORY BAR */
+.categories {
+  display:flex;
+  overflow-x:auto;
+  padding:10px;
+  background:#1c1c1c;
+}
+
+.category {
+  padding:6px 15px;
+  margin-right:8px;
+  background:#333;
+  border-radius:20px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.category.active {
+  background:#e50914;
+}
+
+/* SLIDER */
+.slider {
+  height:250px;
+  position:relative;
+  overflow:hidden;
+}
+
+.slide {
+  position:absolute;
+  width:100%;
+  height:100%;
+  background-size:cover;
+  background-position:center;
+  opacity:0;
+  transition:1s;
+}
+
+.slide.active { opacity:1; }
+
+/* GRID */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:15px;
+  padding:20px;
+}
+
+.card {
+  background:#1c1c1c;
+  border-radius:10px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:.3s;
+  position:relative;
+}
+
+.card:hover { transform:scale(1.08); }
+
+.card img {
+  width:100%;
+  height:130px;
+  object-fit:contain;
+  background:black;
+}
+
+.card-title {
+  padding:6px;
+  font-size:13px;
+  text-align:center;
+}
+
+.fav {
+  position:absolute;
+  top:5px;
+  right:5px;
+  font-size:18px;
+  cursor:pointer;
+}
+
+/* PLAYER */
+.overlay {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:black;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:999;
+}
+
+video {
+  width:90%;
+  max-width:1100px;
+}
+
+.close-btn {
+  margin-top:10px;
+  padding:8px 15px;
+  background:red;
+  border:none;
+  color:white;
+  border-radius:5px;
+  cursor:pointer;
+}
 </style>
 </head>
 <body>
@@ -53,12 +168,9 @@ let channels=[];
 let currentCategory="All";
 let favorites=JSON.parse(localStorage.getItem("favorites"))||[];
 
-// 🔥 YOUR WORKER PROXY
-const PROXY="https://vivareiyh.reynielinding.workers.dev/?url=";
-
 (async function(){
-const playlistUrl="https://raw.githubusercontent.com/reiyhbit/iptv/refs/heads/main/viva.m3u";
-const text=await fetch(playlistUrl).then(r=>r.text());
+const url="https://raw.githubusercontent.com/reiyhbit/iptv/refs/heads/main/viva.m3u";
+const text=await fetch(url).then(r=>r.text());
 const lines=text.split("\n");
 
 for(let i=0;i<lines.length;i++){
@@ -72,15 +184,16 @@ for(let i=0;i<lines.length;i++){
   channels.push({name,logo,group,stream});
  }
 }
+
 buildCategories();
 buildSlider();
 renderGrid();
 })();
 
+/* CATEGORY */
 function buildCategories(){
 let cats=["All","Favorites",...new Set(channels.map(c=>c.group))];
 let container=document.getElementById("categories");
-container.innerHTML="";
 cats.forEach(cat=>{
  let div=document.createElement("div");
  div.className="category";
@@ -96,9 +209,9 @@ cats.forEach(cat=>{
 });
 }
 
+/* SLIDER */
 function buildSlider(){
 let slider=document.getElementById("slider");
-slider.innerHTML="";
 channels.slice(0,5).forEach((c,i)=>{
  let slide=document.createElement("div");
  slide.className="slide";
@@ -109,13 +222,13 @@ channels.slice(0,5).forEach((c,i)=>{
 let index=0;
 setInterval(()=>{
  let slides=document.querySelectorAll(".slide");
- if(slides.length===0) return;
  slides[index].classList.remove("active");
  index=(index+1)%slides.length;
  slides[index].classList.add("active");
 },4000);
 }
 
+/* GRID */
 function renderGrid(){
 let grid=document.getElementById("grid");
 grid.innerHTML="";
@@ -145,8 +258,10 @@ channels
 });
 }
 
+/* SEARCH */
 document.getElementById("searchInput").oninput=renderGrid;
 
+/* FAVORITES */
 function toggleFavorite(name){
  if(favorites.includes(name)){
   favorites=favorites.filter(f=>f!==name);
@@ -155,33 +270,22 @@ function toggleFavorite(name){
  renderGrid();
 }
 
+/* PLAYER */
 function playChannel(url,name){
  localStorage.setItem("lastWatched",name);
-
- const finalUrl=PROXY+encodeURIComponent(url);
-
  let overlay=document.getElementById("overlay");
  let video=document.getElementById("videoPlayer");
-
  overlay.style.display="flex";
  video.requestFullscreen().catch(()=>{});
-
  if(Hls.isSupported()){
-  if(window.hlsInstance){window.hlsInstance.destroy();}
-  window.hlsInstance=new Hls({
-    maxBufferLength:30,
-    maxMaxBufferLength:60,
-    liveSyncDurationCount:3
-  });
-  window.hlsInstance.loadSource(finalUrl);
-  window.hlsInstance.attachMedia(video);
- }
- else if(video.canPlayType("application/vnd.apple.mpegurl")){
-  video.src=finalUrl;
- }
- else{
-  const player=new shaka.Player(video);
-  player.load(finalUrl);
+  let hls=new Hls();
+  hls.loadSource(url);
+  hls.attachMedia(video);
+ } else if(video.canPlayType("application/vnd.apple.mpegurl")){
+  video.src=url;
+ } else {
+  let player=new shaka.Player(video);
+  player.load(url);
  }
 }
 
@@ -189,7 +293,6 @@ function closePlayer(){
  let video=document.getElementById("videoPlayer");
  video.pause();
  video.src="";
- if(window.hlsInstance){window.hlsInstance.destroy();}
  document.getElementById("overlay").style.display="none";
 }
 </script>
