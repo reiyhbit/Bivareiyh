@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>IPTV Web App | Netflix Style Header</title>
-
+<title>Netflix Style IPTV | Trending Rows</title>
 <style>
 * {
   margin: 0;
@@ -13,14 +12,13 @@
 }
 
 body {
-  margin: 0;
   background: #0f0f0f;
   color: white;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   overflow-x: hidden;
 }
 
-/* ===== NETFLIX STYLE STICKY HEADER ===== */
+/* ========== NETFLIX STICKY HEADER ========== */
 .header {
   position: fixed;
   top: 0;
@@ -29,225 +27,248 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 20px;
-  background: transparent;
+  padding: 20px 24px;
+  background: linear-gradient(to bottom, #000000cc 0%, transparent 100%);
   transition: all 0.3s ease;
   z-index: 1000;
   backdrop-filter: blur(0px);
-  -webkit-backdrop-filter: blur(0px);
 }
 
-/* Scrolled state — Netflix dark compact header */
 .header.scrolled {
   background: #0a0a0a;
-  padding: 12px 20px;
+  padding: 12px 24px;
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
 }
 
 .logo {
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   font-weight: 900;
   background: linear-gradient(135deg, #e50914, #b20710);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
   letter-spacing: -0.5px;
-  transition: font-size 0.2s ease;
 }
 
-.header.scrolled .logo {
-  font-size: 1.3rem;
-}
+.header.scrolled .logo { font-size: 1.4rem; }
 
 .search-box input {
-  padding: 8px 14px;
+  padding: 8px 16px;
   border-radius: 30px;
   border: none;
   background: rgba(255,255,255,0.15);
   color: white;
   font-size: 0.85rem;
-  width: 160px;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
-}
-
-.header.scrolled .search-box input {
-  background: rgba(0,0,0,0.7);
-  border: 1px solid rgba(255,255,255,0.2);
+  width: 180px;
+  transition: 0.2s;
 }
 
 .search-box input:focus {
   outline: none;
   background: rgba(0,0,0,0.85);
-  width: 180px;
   border: 1px solid #e50914;
+  width: 200px;
 }
 
-/* Filler spacing for fixed header */
-.content-padder {
-  padding-top: 80px;
+/* main content offset for fixed header */
+.main-content {
+  padding-top: 85px;
 }
 
-/* CATEGORY BAR — Netflix style */
-.categories {
-  display: flex;
+/* ========== CATEGORY ROW (horizontal scroll) ========== */
+.categories-row {
+  padding: 0 24px 16px 24px;
   overflow-x: auto;
-  padding: 12px 20px;
-  background: #0f0f0f;
-  gap: 8px;
+  white-space: nowrap;
   scrollbar-width: thin;
   position: sticky;
   top: 70px;
+  background: #0f0f0f;
   z-index: 99;
-  backdrop-filter: blur(4px);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
-.categories::-webkit-scrollbar {
-  height: 3px;
-}
-
-.category {
-  padding: 6px 18px;
-  background: rgba(255,255,255,0.08);
+.category-chip {
+  display: inline-block;
+  padding: 8px 20px;
+  margin-right: 12px;
+  background: rgba(255,255,255,0.1);
   border-radius: 40px;
-  cursor: pointer;
-  white-space: nowrap;
   font-size: 0.85rem;
   font-weight: 500;
-  transition: all 0.2s;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.category.active {
+.category-chip.active {
   background: #e50914;
-  color: white;
   transform: scale(1.02);
 }
 
-/* SLIDER (hero) */
-.slider {
-  height: 260px;
+/* ========== NETFLIX STYLE ROWS WITH NUMBERED TRENDING ========== */
+.row {
+  margin-bottom: 40px;
+  padding: 0 24px;
+}
+
+.row-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.row-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.row-badge {
+  background: #e50914;
+  padding: 4px 10px;
+  border-radius: 30px;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* horizontal scroll container */
+.row-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  scroll-behavior: smooth;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+}
+
+.row-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+
+/* Netflix card with number badge for trending */
+.trend-card {
   position: relative;
-  overflow: hidden;
-  border-radius: 0 0 18px 18px;
-  margin: 0 0 12px 0;
-}
-
-.slide {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center 30%;
-  opacity: 0;
-  transition: opacity 1s cubic-bezier(0.2, 0.9, 0.4, 1);
-}
-
-.slide.active {
-  opacity: 1;
-}
-
-/* GRID — modern cards */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 16px;
-  padding: 20px 20px 40px;
-}
-
-.card {
+  flex: 0 0 150px;
   background: #181818;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-  position: relative;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.25s ease, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
-.card:hover {
+.trend-card:hover {
   transform: scale(1.05);
-  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.6);
+  z-index: 5;
 }
 
-.card img {
+.trend-card img {
   width: 100%;
   height: 140px;
   object-fit: contain;
   background: #0a0a0a;
-  transition: transform 0.3s;
+  display: block;
+}
+
+.card-number {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  font-size: 4rem;
+  font-weight: 900;
+  color: rgba(0,0,0,0.7);
+  -webkit-text-stroke: 2px #e50914;
+  text-stroke: 2px #e50914;
+  text-shadow: 2px 2px 0px #000;
+  z-index: 3;
+  font-family: 'Impact', sans-serif;
+  letter-spacing: -3px;
+  opacity: 0.9;
+}
+
+/* better number visibility */
+.trend-card .card-number span {
+  background: linear-gradient(145deg, #e50914, #b20710);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+
+.card-info {
+  padding: 10px 8px;
+  text-align: center;
 }
 
 .card-title {
-  padding: 10px 8px;
   font-size: 13px;
   font-weight: 500;
-  text-align: center;
-  color: #ddd;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.fav {
+.fav-icon {
   position: absolute;
   top: 8px;
-  right: 10px;
-  font-size: 22px;
+  right: 8px;
+  font-size: 20px;
   cursor: pointer;
-  text-shadow: 0 0 3px black;
-  z-index: 2;
-  transition: 0.1s;
-}
-
-.resume-badge {
-  background: #e50914;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: bold;
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 2;
+  z-index: 4;
+  text-shadow: 0 0 4px black;
+  background: rgba(0,0,0,0.5);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   backdrop-filter: blur(2px);
-  letter-spacing: 0.5px;
 }
 
-/* PLAYER OVERLAY */
+.resume-badge-mini {
+  position: absolute;
+  bottom: 40px;
+  left: 6px;
+  background: #e50914;
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: bold;
+  z-index: 3;
+}
+
+/* ========== PLAYER OVERLAY (NETFLIX STYLE) ========== */
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: #000000e6;
+  background: #000000f2;
   display: none;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   z-index: 2000;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
 }
 
 .video-container {
-  width: 94%;
-  max-width: 1200px;
+  width: 90%;
+  max-width: 1100px;
   position: relative;
   background: #000;
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 25px 40px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 35px rgba(0,0,0,0.5);
 }
 
 video {
   width: 100%;
   display: block;
-  background: black;
 }
 
 .theater-mode .video-container {
@@ -256,24 +277,17 @@ video {
   border-radius: 0;
 }
 
-.theater-mode .close-btn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-}
-
 .player-controls {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: linear-gradient(0deg, rgba(0,0,0,0.9), transparent);
+  padding: 12px 20px;
+  background: linear-gradient(0deg, #000000cc, transparent);
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   opacity: 0;
-  transition: 0.25s ease;
+  transition: 0.2s;
 }
 
 .video-container:hover .player-controls {
@@ -282,63 +296,50 @@ video {
 
 .quality-btn, .theater-btn {
   background: #e50914;
-  color: white;
   border: none;
+  color: white;
   padding: 6px 14px;
   border-radius: 30px;
   cursor: pointer;
-  margin: 0 4px;
   font-size: 12px;
   font-weight: bold;
-  transition: 0.2s;
+  margin: 0 4px;
 }
 
 .quality-menu {
   position: absolute;
   bottom: 45px;
-  left: 0;
-  background: #1a1a1a;
+  left: 12px;
+  background: #1c1c1c;
   border-radius: 12px;
   display: none;
   flex-direction: column;
   min-width: 110px;
   border: 1px solid #333;
-  overflow: hidden;
-  z-index: 2200;
+  z-index: 2100;
 }
 
-.quality-menu.show {
-  display: flex;
-}
+.quality-menu.show { display: flex; }
 
 .quality-option {
-  padding: 10px 14px;
+  padding: 8px 14px;
   cursor: pointer;
-  font-size: 13px;
-  transition: 0.15s;
-  color: #eee;
+  font-size: 12px;
 }
 
-.quality-option:hover {
+.quality-option:hover, .quality-option.active {
   background: #e50914;
-}
-
-.quality-option.active {
-  background: #e50914;
-  font-weight: bold;
 }
 
 .close-btn {
   margin-top: 20px;
-  padding: 10px 22px;
   background: #e50914;
   border: none;
-  color: white;
+  padding: 8px 24px;
   border-radius: 40px;
-  cursor: pointer;
+  color: white;
   font-weight: bold;
-  font-size: 14px;
-  transition: 0.2s;
+  cursor: pointer;
 }
 
 .buffering-indicator {
@@ -347,57 +348,35 @@ video {
   left: 50%;
   transform: translate(-50%, -50%);
   background: rgba(0,0,0,0.8);
-  color: white;
   padding: 6px 18px;
-  border-radius: 40px;
+  border-radius: 30px;
   font-size: 13px;
   display: none;
   z-index: 15;
-  backdrop-filter: blur(6px);
 }
 
-/* responsive */
-@media (max-width: 600px) {
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 12px;
-    padding: 16px;
-  }
-  .slider {
-    height: 190px;
-  }
-  .logo {
-    font-size: 1.3rem;
-  }
-  .header.scrolled .logo {
-    font-size: 1.1rem;
-  }
-  .search-box input {
-    width: 130px;
-    font-size: 0.75rem;
-  }
-  .categories {
-    top: 66px;
-    padding: 10px 16px;
-  }
+@media (max-width: 700px) {
+  .trend-card { flex: 0 0 130px; }
+  .trend-card img { height: 120px; }
+  .row-title { font-size: 1.2rem; }
+  .main-content { padding-top: 75px; }
+  .categories-row { padding: 0 16px 12px 16px; top: 64px; }
 }
 </style>
 </head>
 <body>
 
-<!-- NETFLIX INSPIRED STICKY HEADER (compact on scroll) -->
 <div class="header" id="netflixHeader">
   <div class="logo">BivaReiyh</div>
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search channel...">
+    <input type="text" id="searchInput" placeholder="Search channels...">
   </div>
 </div>
 
-<div class="content-padder"></div>
-
-<div class="categories" id="categories"></div>
-<div class="slider" id="slider"></div>
-<div class="grid" id="grid"></div>
+<div class="main-content">
+  <div class="categories-row" id="categoriesRow"></div>
+  <div id="dynamicRowsContainer"></div>
+</div>
 
 <div class="overlay" id="overlay">
   <div class="video-container">
@@ -407,155 +386,199 @@ video {
       <div style="position:relative">
         <button class="quality-btn" id="qualityBtn">⚙️ Auto</button>
         <div class="quality-menu" id="qualityMenu">
-          <div class="quality-option active" data-quality="auto">Auto</div>
+          <div class="quality-option" data-quality="auto">Auto</div>
           <div class="quality-option" data-quality="1080p">1080p</div>
           <div class="quality-option" data-quality="720p">720p</div>
-          <div class="quality-option" data-quality="480p">480p</div>
         </div>
       </div>
-      <div>
-        <button class="theater-btn" id="theaterBtn">🌙 Theater</button>
-      </div>
+      <button class="theater-btn" id="theaterBtn">🌙 Theater</button>
     </div>
   </div>
   <button class="close-btn" onclick="closePlayer()">Close</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <script>
-// ---------- GLOBALS ----------
-let channels = [];
-let currentCategory = "All";
+// ------------------- GLOBALS -------------------
+let allChannels = [];
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+let currentCategory = "All";
 let hlsInstance = null;
 let currentVideoName = "";
 let currentVideoUrl = "";
+let activeSaveInterval = null;
 
-// ---------- NETFLIX STICKY HEADER (SCROLL) ----------
+// DOM elements
 const header = document.getElementById('netflixHeader');
+const categoriesRow = document.getElementById('categoriesRow');
+const rowsContainer = document.getElementById('dynamicRowsContainer');
+const searchInput = document.getElementById('searchInput');
+
+// ---------- STICKY HEADER SCROLL ----------
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 30) {
-    header.classList.add('scrolled');
-  } else {
-    header.classList.remove('scrolled');
-  }
+  if (window.scrollY > 25) header.classList.add('scrolled');
+  else header.classList.remove('scrolled');
 });
 
-// ---------- FETCH M3U ----------
-(async function() {
+// ---------- FETCH & PARSE M3U ----------
+async function loadChannels() {
   try {
-    const url = "https://Niel01581.github.io/secret/viva.m3u";
-    const text = await fetch(url).then(r => r.text());
+    const m3uUrl = "https://Niel01581.github.io/secret/viva.m3u";
+    const response = await fetch(m3uUrl);
+    const text = await response.text();
     const lines = text.split("\n");
-    
+    let channelsRaw = [];
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].startsWith("#EXTINF")) {
         let name = lines[i].split(",")[1] || "Unknown";
         let logoMatch = lines[i].match(/tvg-logo="([^"]+)"/);
         let groupMatch = lines[i].match(/group-title="([^"]+)"/);
-        let logo = logoMatch ? logoMatch[1] : "https://via.placeholder.com/150x120?text=No+Logo";
+        let logo = logoMatch ? logoMatch[1] : "https://placehold.co/150x120/1a1a1a/white?text=TV";
         let group = groupMatch ? groupMatch[1] : "Others";
-        let stream = lines[i + 1] || "";
-        if (stream && stream.trim() !== "") {
-          channels.push({ name: name.trim(), logo, group, stream: stream.trim() });
+        let stream = lines[i+1] ? lines[i+1].trim() : "";
+        if (stream && stream !== "") {
+          channelsRaw.push({ name: name.trim(), logo, group, stream });
         }
       }
     }
-    buildCategories();
-    buildSlider();
-    renderGrid();
-    checkResumePosition();
+    allChannels = channelsRaw;
+    if (allChannels.length === 0) throw new Error("no channels");
   } catch(e) {
-    console.error("Error loading M3U", e);
-    // dummy fallback if offline / error
-    channels = [{
-      name: "Sample Channel", logo: "https://via.placeholder.com/150x120?text=Sample", group: "Demo", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
-    }];
-    buildCategories();
-    buildSlider();
-    renderGrid();
+    console.warn("fallback demo data");
+    allChannels = [
+      { name: "Netflix Originals", logo: "https://placehold.co/150x120/e50914/white?text=Trend1", group: "Trending", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+      { name: "Action Movies", logo: "https://placehold.co/150x120/222/white?text=Action", group: "Movies", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+      { name: "Comedy Central", logo: "https://placehold.co/150x120/333/white?text=Comedy", group: "Comedy", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+      { name: "Sports HD", logo: "https://placehold.co/150x120/004e92/white?text=Sports", group: "Sports", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+      { name: "News 24/7", logo: "https://placehold.co/150x120/2c3e50/white?text=News", group: "News", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
+    ];
+    for(let i=0;i<12;i++) allChannels.push({ name: `Channel ${i+10}`, logo: `https://placehold.co/150x120/444/white?text=Ch${i+10}`, group: "Popular", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" });
   }
-})();
+  buildCategories();
+  renderAllRows();
+}
 
-// ---------- CATEGORIES (with 'Favorites' support) ----------
+// ---------- CATEGORY CHIPS (Netflix style) ----------
 function buildCategories() {
-  let cats = ["All", "Favorites", ...new Set(channels.map(c => c.group))];
-  let container = document.getElementById("categories");
-  container.innerHTML = "";
-  cats.forEach(cat => {
-    let div = document.createElement("div");
-    div.className = "category";
-    div.textContent = cat;
-    if (cat === "All") div.classList.add("active");
-    div.onclick = () => {
-      document.querySelectorAll(".category").forEach(c => c.classList.remove("active"));
-      div.classList.add("active");
-      currentCategory = cat;
-      renderGrid();
+  let groups = ["All", "Favorites", ...new Set(allChannels.map(c => c.group))];
+  categoriesRow.innerHTML = "";
+  groups.forEach(grp => {
+    let chip = document.createElement("div");
+    chip.className = "category-chip";
+    chip.textContent = grp;
+    if (grp === "All") chip.classList.add("active");
+    chip.onclick = () => {
+      document.querySelectorAll(".category-chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      currentCategory = grp;
+      renderAllRows();
     };
-    container.appendChild(div);
+    categoriesRow.appendChild(chip);
   });
 }
 
-// ---------- SLIDER (hero banners) ----------
-function buildSlider() {
-  let slider = document.getElementById("slider");
-  slider.innerHTML = "";
-  let topShows = channels.slice(0, 6);
-  topShows.forEach((c, i) => {
-    let slide = document.createElement("div");
-    slide.className = "slide";
-    slide.style.backgroundImage = `url('${c.logo}')`;
-    slide.style.backgroundSize = "contain";
-    slide.style.backgroundColor = "#0a0a0a";
-    if (i === 0) slide.classList.add("active");
-    slider.appendChild(slide);
-  });
-  let index = 0;
-  setInterval(() => {
-    let slides = document.querySelectorAll(".slide");
-    if (slides.length === 0) return;
-    slides[index].classList.remove("active");
-    index = (index + 1) % slides.length;
-    slides[index].classList.add("active");
-  }, 5000);
-}
-
-// ---------- RENDER GRID (with search & favorites) ----------
-function renderGrid() {
-  let grid = document.getElementById("grid");
-  grid.innerHTML = "";
-  let searchTerm = document.getElementById("searchInput").value.toLowerCase();
-  let filtered = channels.filter(c => {
-    if (currentCategory === "Favorites") return favorites.includes(c.name);
-    if (currentCategory === "All") return true;
-    return c.group === currentCategory;
-  }).filter(c => c.name.toLowerCase().includes(searchTerm));
+// ---------- RENDER NETFLIX ROWS + TRENDING WITH NUMBERS 1 2 3 4 5 6 ----------
+function renderAllRows() {
+  rowsContainer.innerHTML = "";
   
-  filtered.forEach(c => {
-    let card = document.createElement("div");
-    card.className = "card";
-    let resumePos = localStorage.getItem(`resume_${c.name}`);
-    let resumeBadge = resumePos ? '<div class="resume-badge">▶️ Resume</div>' : '';
-    card.innerHTML = `
-      ${resumeBadge}
-      <div class="fav">${favorites.includes(c.name) ? "⭐" : "☆"}</div>
-      <img src="${c.logo}" alt="${c.name}" loading="lazy">
-      <div class="card-title">${c.name}</div>
-    `;
-    card.querySelector(".fav").onclick = (e) => {
-      e.stopPropagation();
-      toggleFavorite(c.name);
-    };
-    card.onclick = () => playChannel(c.stream, c.name);
-    grid.appendChild(card);
+  // Filter based on category & search
+  let searchTerm = searchInput.value.toLowerCase();
+  let filteredByCat = allChannels.filter(ch => {
+    if (currentCategory === "Favorites") return favorites.includes(ch.name);
+    if (currentCategory === "All") return true;
+    return ch.group === currentCategory;
   });
+  let finalChannels = filteredByCat.filter(ch => ch.name.toLowerCase().includes(searchTerm));
+  
+  if (finalChannels.length === 0) {
+    rowsContainer.innerHTML = `<div style="padding: 60px 24px; text-align:center; color:#aaa;">✨ No channels found ✨</div>`;
+    return;
+  }
+  
+  // 1️⃣ TRENDING ROW (numbered 1 to 6) -> first 6 channels as trending
+  let trendingItems = finalChannels.slice(0, Math.min(12, finalChannels.length));
+  if (trendingItems.length > 0) {
+    let trendingRow = createNumberedRow("🔥 Trending Now", trendingItems, 1);
+    rowsContainer.appendChild(trendingRow);
+  }
+  
+  // 2️⃣ TOP PICKS ROW (numbered 1-6 again but for variety) Next 6 channels (if exist)
+  let topPicks = finalChannels.slice(6, 12);
+  if (topPicks.length > 0) {
+    let picksRow = createNumberedRow("✨ Top Picks for You", topPicks, 1);
+    rowsContainer.appendChild(picksRow);
+  }
+  
+  // 3️⃣ Category based rows: group by genre (group)
+  let groupsMap = new Map();
+  finalChannels.forEach(ch => {
+    if (!groupsMap.has(ch.group)) groupsMap.set(ch.group, []);
+    groupsMap.get(ch.group).push(ch);
+  });
+  
+  // display each group as a separate row (with numbers starting from 1 again)
+  for (let [groupName, groupChannels] of groupsMap.entries()) {
+    if (groupName === "Trending") continue;
+    let row = createNumberedRow(`📺 ${groupName}`, groupChannels.slice(0, 15), 1);
+    rowsContainer.appendChild(row);
+  }
+  
+  // favorites row if category is not Favorites already
+  if (currentCategory !== "Favorites" && favorites.length > 0) {
+    let favChannels = finalChannels.filter(ch => favorites.includes(ch.name));
+    if (favChannels.length > 0) {
+      let favRow = createNumberedRow("⭐ My Favorites", favChannels.slice(0, 12), 1);
+      rowsContainer.appendChild(favRow);
+    }
+  }
 }
 
-// Search listener
-document.getElementById("searchInput").addEventListener("input", renderGrid);
+// create a horizontal scroll row with numbered badges (1,2,3...)
+function createNumberedRow(title, channelsList, startNumber = 1) {
+  const rowDiv = document.createElement('div');
+  rowDiv.className = 'row';
+  
+  const headerDiv = document.createElement('div');
+  headerDiv.className = 'row-header';
+  headerDiv.innerHTML = `<div class="row-title">${title}</div><div class="row-badge">NETFLIX STYLE</div>`;
+  rowDiv.appendChild(headerDiv);
+  
+  const scrollDiv = document.createElement('div');
+  scrollDiv.className = 'row-scroll';
+  
+  channelsList.forEach((channel, idx) => {
+    const cardNumber = startNumber + idx;  // 1,2,3,4...
+    const card = document.createElement('div');
+    card.className = 'trend-card';
+    const isFav = favorites.includes(channel.name);
+    const resumePos = localStorage.getItem(`resume_${channel.name}`);
+    const resumeHtml = resumePos ? `<div class="resume-badge-mini">▶️ Resume</div>` : '';
+    
+    card.innerHTML = `
+      <div class="card-number"><span>${cardNumber}</span></div>
+      <div class="fav-icon">${isFav ? "⭐" : "☆"}</div>
+      ${resumeHtml}
+      <img src="${channel.logo}" alt="${channel.name}" loading="lazy">
+      <div class="card-info">
+        <div class="card-title">${channel.name}</div>
+      </div>
+    `;
+    
+    const favIconDiv = card.querySelector('.fav-icon');
+    favIconDiv.onclick = (e) => {
+      e.stopPropagation();
+      toggleFavorite(channel.name);
+    };
+    
+    card.onclick = () => playChannel(channel.stream, channel.name);
+    scrollDiv.appendChild(card);
+  });
+  
+  rowDiv.appendChild(scrollDiv);
+  return rowDiv;
+}
 
+// ---------- FAVORITE LOGIC ----------
 function toggleFavorite(name) {
   if (favorites.includes(name)) {
     favorites = favorites.filter(f => f !== name);
@@ -563,224 +586,157 @@ function toggleFavorite(name) {
     favorites.push(name);
   }
   localStorage.setItem("favorites", JSON.stringify(favorites));
-  renderGrid();
+  renderAllRows();  // refresh all rows
 }
 
-// ---------- BUFFERING UI ----------
+// ---------- SEARCH ----------
+searchInput.addEventListener('input', () => {
+  renderAllRows();
+});
+
+// ---------- PLAYER & HLS + RESUME, QUALITY ----------
 function attachBuffering(video) {
-  let buffIcon = document.getElementById("bufferingIndicator");
-  video.addEventListener("waiting", () => { buffIcon.style.display = "block"; });
-  video.addEventListener("playing", () => { buffIcon.style.display = "none"; });
-  video.addEventListener("canplay", () => { buffIcon.style.display = "none"; });
+  const bufDiv = document.getElementById('bufferingIndicator');
+  video.addEventListener('waiting', () => bufDiv.style.display = 'block');
+  video.addEventListener('playing', () => bufDiv.style.display = 'none');
+  video.addEventListener('canplay', () => bufDiv.style.display = 'none');
 }
 
-// ---------- QUALITY SELECTION + THEATER MODE ----------
-function toggleQualityMenu() {
-  document.getElementById("qualityMenu").classList.toggle("show");
-}
-
-function setQuality(level) {
-  document.getElementById("qualityMenu").classList.remove("show");
-  if (!hlsInstance) return;
-  if (level === "auto") {
-    hlsInstance.currentLevel = -1;
-  } else {
-    let targetHeight = parseInt(level);
-    let idx = hlsInstance.levels.findIndex(l => l.height === targetHeight);
-    if (idx !== -1) hlsInstance.currentLevel = idx;
-  }
-  // update active style
-  document.querySelectorAll(".quality-option").forEach(opt => opt.classList.remove("active"));
-  let activeOpt = Array.from(document.querySelectorAll(".quality-option")).find(opt => opt.getAttribute("data-quality") === level);
-  if (activeOpt) activeOpt.classList.add("active");
-}
-
-function setHlsQualityByIndex(levelIndex) {
-  if (hlsInstance) hlsInstance.currentLevel = levelIndex;
-}
-
-let theaterActive = false;
-function toggleTheaterMode() {
-  let overlayDiv = document.getElementById("overlay");
-  overlayDiv.classList.toggle("theater-mode");
-  theaterActive = overlayDiv.classList.contains("theater-mode");
-  localStorage.setItem("theaterMode", theaterActive);
-  let btn = document.getElementById("theaterBtn");
-  btn.textContent = theaterActive ? "🌙 Normal" : "🌙 Theater";
-}
-
-// Resume & smarter playback
 function playChannel(streamUrl, channelName) {
   currentVideoUrl = streamUrl;
   currentVideoName = channelName;
-  let overlay = document.getElementById("overlay");
-  let video = document.getElementById("videoPlayer");
+  const overlay = document.getElementById('overlay');
+  const video = document.getElementById('videoPlayer');
   
-  if (hlsInstance) {
-    hlsInstance.destroy();
-    hlsInstance = null;
-  }
+  if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+  if (activeSaveInterval) clearInterval(activeSaveInterval);
   
-  overlay.style.display = "flex";
-  if (localStorage.getItem("theaterMode") === "true") {
-    overlay.classList.add("theater-mode");
-    document.getElementById("theaterBtn").textContent = "🌙 Normal";
+  overlay.style.display = 'flex';
+  if (localStorage.getItem('theaterMode') === 'true') {
+    overlay.classList.add('theater-mode');
+    document.getElementById('theaterBtn').textContent = '🌙 Normal';
   } else {
-    overlay.classList.remove("theater-mode");
-    document.getElementById("theaterBtn").textContent = "🌙 Theater";
+    overlay.classList.remove('theater-mode');
+    document.getElementById('theaterBtn').textContent = '🌙 Theater';
   }
   
   attachBuffering(video);
-  video.preload = "auto";
+  video.preload = 'auto';
   
-  // resume logic
+  // resume
   let savedTime = localStorage.getItem(`resume_${channelName}`);
-  let resumeHandler = () => {
-    if (savedTime && !isNaN(parseFloat(savedTime)) && video.duration && video.duration > 30) {
+  const resumeHandler = () => {
+    if (savedTime && video.duration && video.duration > 10 && parseFloat(savedTime) < video.duration - 5) {
       video.currentTime = parseFloat(savedTime);
     }
-    video.removeEventListener("loadedmetadata", resumeHandler);
+    video.removeEventListener('loadedmetadata', resumeHandler);
   };
-  video.addEventListener("loadedmetadata", resumeHandler);
+  video.addEventListener('loadedmetadata', resumeHandler);
   
-  // save periodically
-  let saveInterval = setInterval(() => {
-    if (video && !video.paused && video.currentTime > 30 && video.currentTime < video.duration - 5) {
+  activeSaveInterval = setInterval(() => {
+    if (video && !video.paused && video.currentTime > 25 && video.currentTime < video.duration - 3) {
       localStorage.setItem(`resume_${channelName}`, video.currentTime);
     }
-  }, 8000);
+  }, 7000);
   
-  video.addEventListener("ended", () => {
-    clearInterval(saveInterval);
+  video.addEventListener('ended', () => {
+    clearInterval(activeSaveInterval);
     localStorage.removeItem(`resume_${channelName}`);
   });
-  video.addEventListener("pause", () => { /* keep */ });
   
-  // Network aware quality pre-selection
-  if (navigator.connection) {
-    let type = navigator.connection.effectiveType;
-    if (type === "slow-2g" || type === "2g") {
-      // keep auto but hint lower
-    }
-  }
-  
-  let isHls = streamUrl.toLowerCase().includes(".m3u8");
-  let isMp4 = /\.(mp4|mkv|avi|mov|webm)(\?|$)/i.test(streamUrl);
-  
+  const isHls = streamUrl.toLowerCase().includes('.m3u8');
   if (isHls && Hls.isSupported()) {
-    let hls = new Hls({
-      maxBufferLength: 60,
-      startLevel: -1,
-      capLevelToPlayerSize: true,
-    });
+    const hls = new Hls({ maxBufferLength: 60, startLevel: -1, capLevelToPlayerSize: true });
     hls.loadSource(streamUrl);
     hls.attachMedia(video);
     hlsInstance = hls;
-    
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      let qualityMenuDiv = document.getElementById("qualityMenu");
-      // rebuild quality list with actual levels
+      const menu = document.getElementById('qualityMenu');
       let levels = hls.levels;
-      let existingOptions = qualityMenuDiv.querySelectorAll(".quality-option");
-      if (levels.length > 0) {
-        // clear old ones except the auto
-        Array.from(existingOptions).forEach(opt => {
-          if (opt.getAttribute("data-quality") !== "auto") opt.remove();
-        });
-        levels.forEach((level, idx) => {
-          let height = level.height;
-          if (height) {
-            let opt = document.createElement("div");
-            opt.className = "quality-option";
-            opt.textContent = `${height}p`;
-            opt.setAttribute("data-quality", `${height}p`);
-            opt.onclick = () => {
-              setHlsQualityByIndex(idx);
-              document.querySelectorAll(".quality-option").forEach(o => o.classList.remove("active"));
-              opt.classList.add("active");
-              document.getElementById("qualityMenu").classList.remove("show");
-            };
-            qualityMenuDiv.appendChild(opt);
-          }
-        });
-      }
+      let existing = menu.querySelectorAll('.quality-option:not([data-quality="auto"])');
+      existing.forEach(opt => opt.remove());
+      levels.forEach((level, idx) => {
+        if (level.height) {
+          let opt = document.createElement('div');
+          opt.className = 'quality-option';
+          opt.textContent = `${level.height}p`;
+          opt.setAttribute('data-quality', `${level.height}p`);
+          opt.onclick = () => {
+            hls.currentLevel = idx;
+            document.querySelectorAll('.quality-option').forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+            document.getElementById('qualityMenu').classList.remove('show');
+          };
+          menu.appendChild(opt);
+        }
+      });
     });
-    
-    hls.on(Hls.Events.ERROR, (evt, data) => {
-      if (data.fatal) {
-        console.warn("HLS fatal error, trying reload fallback");
-        video.src = streamUrl;
-      }
-    });
-  } else if (isMp4 || video.canPlayType("video/mp4")) {
-    video.src = streamUrl;
-    video.load();
   } else {
     video.src = streamUrl;
     video.load();
   }
-  
-  video.play().catch(e => console.log("autoplay blocked", e));
-  video.setAttribute("playsinline", "true");
-  
-  // clear saved interval on close later
-  window.__currentSaveInterval = saveInterval;
-  window.__currentVideoCleanup = () => {
-    clearInterval(saveInterval);
-    if (video && video.currentTime > 30) localStorage.setItem(`resume_${channelName}`, video.currentTime);
-  };
+  video.play().catch(e => console.log("autoplay block"));
+}
+
+function setQuality(level) {
+  if (!hlsInstance) return;
+  if (level === 'auto') hlsInstance.currentLevel = -1;
+  else {
+    let targetH = parseInt(level);
+    let idx = hlsInstance.levels.findIndex(l => l.height === targetH);
+    if (idx !== -1) hlsInstance.currentLevel = idx;
+  }
+  document.getElementById('qualityMenu').classList.remove('show');
+}
+
+function toggleTheaterMode() {
+  const overlay = document.getElementById('overlay');
+  overlay.classList.toggle('theater-mode');
+  const isTheater = overlay.classList.contains('theater-mode');
+  localStorage.setItem('theaterMode', isTheater);
+  document.getElementById('theaterBtn').textContent = isTheater ? '🌙 Normal' : '🌙 Theater';
 }
 
 function closePlayer() {
-  let video = document.getElementById("videoPlayer");
-  if (window.__currentSaveInterval) clearInterval(window.__currentSaveInterval);
-  if (currentVideoName && video && video.currentTime > 30) {
+  if (activeSaveInterval) clearInterval(activeSaveInterval);
+  const video = document.getElementById('videoPlayer');
+  if (currentVideoName && video && video.currentTime > 20) {
     localStorage.setItem(`resume_${currentVideoName}`, video.currentTime);
   }
   video.pause();
   video.src = "";
-  document.getElementById("overlay").style.display = "none";
-  document.getElementById("qualityMenu").classList.remove("show");
-  if (hlsInstance) {
-    hlsInstance.destroy();
-    hlsInstance = null;
-  }
+  document.getElementById('overlay').style.display = 'none';
+  if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+  document.getElementById('qualityMenu').classList.remove('show');
 }
 
-function checkResumePosition() {
-  let last = localStorage.getItem("lastWatched");
-  if (last) console.log("resume available for", last);
-}
-
-// quality button event binding
-document.getElementById("qualityBtn").addEventListener("click", toggleQualityMenu);
-document.getElementById("theaterBtn").addEventListener("click", toggleTheaterMode);
-document.querySelectorAll(".quality-option").forEach(opt => {
-  opt.addEventListener("click", (e) => {
-    let quality = opt.getAttribute("data-quality");
-    if (quality) setQuality(quality);
-    else if (opt.textContent.includes("p")) {
-      let val = opt.textContent.replace("p", "");
-      setQuality(val);
-    }
-    document.getElementById("qualityMenu").classList.remove("show");
+// quality menu handlers
+document.getElementById('qualityBtn').addEventListener('click', () => {
+  document.getElementById('qualityMenu').classList.toggle('show');
+});
+document.getElementById('theaterBtn').addEventListener('click', toggleTheaterMode);
+document.querySelectorAll('.quality-option').forEach(opt => {
+  opt.addEventListener('click', (e) => {
+    const qual = opt.getAttribute('data-quality');
+    if (qual) setQuality(qual);
+    else setQuality(opt.textContent.replace('p',''));
   });
 });
-
-// global click to close quality menu
-document.addEventListener("click", (e) => {
-  let menu = document.getElementById("qualityMenu");
-  let btn = document.getElementById("qualityBtn");
-  if (menu && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-    menu.classList.remove("show");
-  }
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('qualityMenu');
+  const btn = document.getElementById('qualityBtn');
+  if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) menu.classList.remove('show');
 });
 
-window.toggleQualityMenu = toggleQualityMenu;
+// expose global helpers
+window.toggleFavorite = toggleFavorite;
+window.playChannel = playChannel;
+window.closePlayer = closePlayer;
 window.setQuality = setQuality;
 window.toggleTheaterMode = toggleTheaterMode;
-window.closePlayer = closePlayer;
-window.playChannel = playChannel;
+
+// Bootstrap
+loadChannels();
 </script>
 </body>
 </html>
