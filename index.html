@@ -1,735 +1,884 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Netflix Style IPTV | Trending Rows</title>
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="StreamFlix - Watch unlimited movies and TV shows on our Netflix-inspired streaming platform">
+    <meta name="keywords" content="streaming, movies, TV shows, Netflix clone, HTML CSS, modern design">
+    <title>StreamFlix - Watch Movies & TV Shows Online</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           CSS VARIABLES & RESET
+        ======================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-  background: #0f0f0f;
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  overflow-x: hidden;
-}
+        :root {
+            --primary-red: #e50914;
+            --primary-dark: #b20710;
+            --bg-dark: #0a0a0a;
+            --bg-card: #1a1a1a;
+            --bg-card-hover: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-muted: #6b6b6b;
+            --success-green: #46d369;
+            --transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            --navbar-height: 68px;
+            --border-radius: 8px;
+            --card-width: 220px;
+        }
 
-/* ========== NETFLIX STICKY HEADER ========== */
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  background: linear-gradient(to bottom, #000000cc 0%, transparent 100%);
-  transition: all 0.3s ease;
-  z-index: 1000;
-  backdrop-filter: blur(0px);
-}
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
 
-.header.scrolled {
-  background: #0a0a0a;
-  padding: 12px 24px;
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-}
+        /* ========================================
+           STICKY NETFLIX-STYLE NAVBAR
+        ======================================== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, #000000 0%, rgba(0,0,0,0.85) 70%, transparent 100%);
+            backdrop-filter: blur(0px);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0;
+        }
 
-.logo {
-  font-size: 1.7rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, #e50914, #b20710);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  letter-spacing: -0.5px;
-}
+        .navbar.scrolled {
+            background: #0a0a0a;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 0.2rem 0;
+        }
 
-.header.scrolled .logo { font-size: 1.4rem; }
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4%;
+            max-width: 1600px;
+            margin: 0 auto;
+            height: var(--navbar-height);
+        }
 
-.search-box input {
-  padding: 8px 16px;
-  border-radius: 30px;
-  border: none;
-  background: rgba(255,255,255,0.15);
-  color: white;
-  font-size: 0.85rem;
-  width: 180px;
-  transition: 0.2s;
-}
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+        }
 
-.search-box input:focus {
-  outline: none;
-  background: rgba(0,0,0,0.85);
-  border: 1px solid #e50914;
-  width: 200px;
-}
+        .logo {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.9rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-dark));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
 
-/* main content offset for fixed header */
-.main-content {
-  padding-top: 85px;
-}
+        .logo:hover {
+            transform: scale(1.02);
+        }
 
-/* ========== CATEGORY ROW (horizontal scroll) ========== */
-.categories-row {
-  padding: 0 24px 16px 24px;
-  overflow-x: auto;
-  white-space: nowrap;
-  scrollbar-width: thin;
-  position: sticky;
-  top: 70px;
-  background: #0f0f0f;
-  z-index: 99;
-}
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
 
-.category-chip {
-  display: inline-block;
-  padding: 8px 20px;
-  margin-right: 12px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 40px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: 0.2s;
-}
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s;
+            position: relative;
+        }
 
-.category-chip.active {
-  background: #e50914;
-  transform: scale(1.02);
-}
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text-primary);
+        }
 
-/* ========== NETFLIX STYLE ROWS WITH NUMBERED TRENDING ========== */
-.row {
-  margin-bottom: 40px;
-  padding: 0 24px;
-}
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-red);
+        }
 
-.row-header {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 16px;
-}
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
 
-.row-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: rgba(20,20,20,0.8);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 30px;
+            padding: 0.4rem 1rem;
+            transition: all 0.2s;
+        }
 
-/* horizontal scroll container */
-.row-scroll {
-  display: flex;
-  overflow-x: auto;
-  gap: 12px;
-  scroll-behavior: smooth;
-  padding-bottom: 12px;
-  scrollbar-width: thin;
-}
+        .search-container:focus-within {
+            border-color: var(--primary-red);
+            background: #0a0a0a;
+        }
 
-.row-scroll::-webkit-scrollbar {
-  height: 5px;
-}
+        .search-icon {
+            display: flex;
+            align-items: center;
+            margin-right: 6px;
+            opacity: 0.7;
+        }
 
-/* Netflix card with number badge for trending */
-.trend-card {
-  position: relative;
-  flex: 0 0 150px;
-  background: #181818;
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-}
+        .search-input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            outline: none;
+            width: 140px;
+        }
 
-.trend-card:hover {
-  transform: scale(1.05);
-  z-index: 5;
-}
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
 
-.trend-card img {
-  width: 100%;
-  height: 140px;
-  object-fit: contain;
-  background: #0a0a0a;
-  display: block;
-}
+        .avatar {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, var(--primary-red), #ff4757);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: none;
+            color: white;
+        }
 
-.card-number {
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  font-size: 4rem;
-  font-weight: 900;
-  color: rgba(0,0,0,0.7);
-  -webkit-text-stroke: 2px #e50914;
-  text-stroke: 2px #e50914;
-  text-shadow: 2px 2px 0px #000;
-  z-index: 3;
-  font-family: 'Impact', sans-serif;
-  letter-spacing: -3px;
-  opacity: 0.9;
-}
+        .avatar:hover {
+            transform: scale(1.05);
+        }
 
-/* better number visibility */
-.trend-card .card-number span {
-  background: linear-gradient(145deg, #e50914, #b20710);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  text-shadow: none;
-}
+        /* ========================================
+           HERO BANNER SECTION
+        ======================================== */
+        .hero {
+            position: relative;
+            height: 85vh;
+            min-height: 550px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 4%;
+            overflow: hidden;
+        }
 
-.card-info {
-  padding: 10px 8px;
-  text-align: center;
-}
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 40%, rgba(229,9,20,0.15) 0%, transparent 60%);
+            pointer-events: none;
+        }
 
-.card-title {
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+        .hero-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(to top, var(--bg-dark), transparent);
+            pointer-events: none;
+        }
 
-.fav-icon {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 20px;
-  cursor: pointer;
-  z-index: 4;
-  text-shadow: 0 0 4px black;
-  background: rgba(0,0,0,0.5);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(2px);
-}
+        .hero-content {
+            position: relative;
+            max-width: 620px;
+            z-index: 2;
+            animation: fadeInUp 0.6s ease-out;
+        }
 
-.resume-badge-mini {
-  position: absolute;
-  bottom: 40px;
-  left: 6px;
-  background: #e50914;
-  font-size: 9px;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-weight: bold;
-  z-index: 3;
-}
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-/* ========== PLAYER OVERLAY (NETFLIX STYLE) ========== */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000000f2;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  z-index: 2000;
-  backdrop-filter: blur(10px);
-}
+        .hero-title {
+            font-size: 3.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 12px rgba(0,0,0,0.5);
+            letter-spacing: -1px;
+        }
 
-.video-container {
-  width: 90%;
-  max-width: 1100px;
-  position: relative;
-  background: #000;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 20px 35px rgba(0,0,0,0.5);
-}
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
 
-video {
-  width: 100%;
-  display: block;
-}
+        .btn {
+            padding: 0.7rem 1.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.2s;
+        }
 
-.theater-mode .video-container {
-  max-width: 100%;
-  width: 100%;
-  border-radius: 0;
-}
+        .btn-play {
+            background: var(--text-primary);
+            color: #000;
+        }
 
-.player-controls {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 20px;
-  background: linear-gradient(0deg, #000000cc, transparent);
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  opacity: 0;
-  transition: 0.2s;
-}
+        .btn-play:hover {
+            background: rgba(255,255,255,0.85);
+            transform: scale(1.03);
+        }
 
-.video-container:hover .player-controls {
-  opacity: 1;
-}
+        .btn-info {
+            background: rgba(109,109,110,0.65);
+            color: var(--text-primary);
+            backdrop-filter: blur(4px);
+        }
 
-.quality-btn, .theater-btn {
-  background: #e50914;
-  border: none;
-  color: white;
-  padding: 6px 14px;
-  border-radius: 30px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: bold;
-  margin: 0 4px;
-}
+        .btn-info:hover {
+            background: rgba(109,109,110,0.5);
+            transform: scale(1.03);
+        }
 
-.quality-menu {
-  position: absolute;
-  bottom: 45px;
-  left: 12px;
-  background: #1c1c1c;
-  border-radius: 12px;
-  display: none;
-  flex-direction: column;
-  min-width: 110px;
-  border: 1px solid #333;
-  z-index: 2100;
-}
+        .hero-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1.2rem;
+            color: rgba(255,255,255,0.85);
+        }
 
-.quality-menu.show { display: flex; }
+        .hero-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+        }
 
-.quality-option {
-  padding: 8px 14px;
-  cursor: pointer;
-  font-size: 12px;
-}
+        .hero-meta span {
+            padding: 0.2rem 0.8rem;
+            background: rgba(0,0,0,0.45);
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+        }
 
-.quality-option:hover, .quality-option.active {
-  background: #e50914;
-}
+        .match {
+            color: var(--success-green);
+            font-weight: 600;
+        }
 
-.close-btn {
-  margin-top: 20px;
-  background: #e50914;
-  border: none;
-  padding: 8px 24px;
-  border-radius: 40px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
+        /* ========================================
+           CONTENT / MOVIE ROWS
+        ======================================== */
+        .content {
+            padding: 1.5rem 4% 3rem;
+            position: relative;
+            z-index: 3;
+        }
 
-.buffering-indicator {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0,0,0,0.8);
-  padding: 6px 18px;
-  border-radius: 30px;
-  font-size: 13px;
-  display: none;
-  z-index: 15;
-}
+        .movie-row {
+            margin-bottom: 3rem;
+        }
 
-@media (max-width: 700px) {
-  .trend-card { flex: 0 0 130px; }
-  .trend-card img { height: 120px; }
-  .row-title { font-size: 1.2rem; }
-  .main-content { padding-top: 75px; }
-  .categories-row { padding: 0 16px 12px 16px; top: 64px; }
-}
-</style>
+        .row-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-left: 0.3rem;
+            letter-spacing: -0.3px;
+        }
+
+        .row-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .row-container {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+            padding: 0.3rem 0.2rem 1rem;
+            scrollbar-width: thin;
+        }
+
+        .row-container::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .row-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .row-container::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 10px;
+        }
+
+        /* ========================================
+           MODERN MOVIE CARDS with RANK & PROGRESS
+        ======================================== */
+        .movie-card {
+            position: relative;
+            flex: 0 0 var(--card-width);
+            min-width: var(--card-width);
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .movie-card:hover {
+            transform: scale(1.05);
+            z-index: 5;
+        }
+
+        .movie-card:focus-within {
+            outline: 2px solid var(--primary-red);
+            outline-offset: 2px;
+        }
+
+        .movie-thumbnail {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-size: cover;
+            background-position: center;
+            border-radius: var(--border-radius);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
+        }
+
+        /* Rank number styling (1,2,3,4,5,6,7) */
+        .rank {
+            position: absolute;
+            bottom: -12px;
+            left: -8px;
+            font-size: 4.8rem;
+            font-weight: 900;
+            font-family: 'Bebas Neue', cursive;
+            background: linear-gradient(145deg, var(--primary-red), var(--primary-dark));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+            line-height: 1;
+            z-index: 2;
+            letter-spacing: -2px;
+        }
+
+        /* Progress bar for continue watching */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255,255,255,0.25);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-red);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .movie-info {
+            padding: 0.7rem 0.3rem 0;
+        }
+
+        .movie-info h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .match-score {
+            color: var(--success-green);
+            font-weight: 500;
+        }
+
+        .episode {
+            color: var(--text-primary);
+        }
+
+        /* ========================================
+           MODERN FOOTER
+        ======================================== */
+        .footer {
+            padding: 3rem 4% 2rem;
+            background: rgba(0,0,0,0.6);
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-links a {
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--primary-red);
+        }
+
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .copyright {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+        }
+
+        /* ========================================
+           RESPONSIVE DESIGN
+        ======================================== */
+        @media screen and (max-width: 1024px) {
+            :root {
+                --card-width: 200px;
+            }
+            .hero-title { font-size: 3rem; }
+            .hero-description { font-size: 0.9rem; }
+        }
+
+        @media screen and (max-width: 768px) {
+            :root {
+                --navbar-height: 58px;
+                --card-width: 160px;
+            }
+            .nav-links { display: none; }
+            .navbar-left { gap: 1rem; }
+            .logo { font-size: 1.5rem; }
+            .hero { height: 70vh; align-items: flex-end; padding-bottom: 3rem; }
+            .hero-title { font-size: 2rem; }
+            .hero-description { font-size: 0.8rem; }
+            .btn { padding: 0.5rem 1.2rem; font-size: 0.85rem; }
+            .row-title { font-size: 1.2rem; }
+            .search-input { width: 100px; }
+            .rank { font-size: 3.2rem; bottom: -8px; left: -5px; }
+        }
+
+        @media screen and (max-width: 480px) {
+            :root {
+                --card-width: 140px;
+            }
+            .hero-title { font-size: 1.6rem; }
+            .hero-buttons { gap: 0.5rem; }
+            .footer-links { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="header" id="netflixHeader">
-  <div class="logo">BivaReiyh</div>
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search channels...">
-  </div>
-</div>
-
-<div class="main-content">
-  <div class="categories-row" id="categoriesRow"></div>
-  <div id="dynamicRowsContainer"></div>
-</div>
-
-<div class="overlay" id="overlay">
-  <div class="video-container">
-    <video id="videoPlayer" controls autoplay preload="auto" playsinline></video>
-    <div class="buffering-indicator" id="bufferingIndicator">Buffering ⚡</div>
-    <div class="player-controls">
-      <div style="position:relative">
-        <button class="quality-btn" id="qualityBtn">⚙️ Auto</button>
-        <div class="quality-menu" id="qualityMenu">
-          <div class="quality-option" data-quality="auto">Auto</div>
-          <div class="quality-option" data-quality="1080p">1080p</div>
-          <div class="quality-option" data-quality="720p">720p</div>
+    <!-- Navigation Bar with Sticky Scroll Effect -->
+    <header class="navbar" id="navbar" role="banner">
+        <div class="navbar-container">
+            <div class="navbar-left">
+                <h1 class="logo" aria-label="StreamFlix Home">STREAMFLIX</h1>
+                <nav class="nav-links" role="navigation" aria-label="Main navigation">
+                    <a href="#home" class="active" aria-current="page">Home</a>
+                    <a href="#series">TV Shows</a>
+                    <a href="#movies">Movies</a>
+                    <a href="#latest">New & Popular</a>
+                    <a href="#mylist">My List</a>
+                </nav>
+            </div>
+            <div class="navbar-right">
+                <div class="search-container">
+                    <label for="search-input" class="search-icon" aria-label="Search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                    </label>
+                    <input type="search" id="search-input" class="search-input" placeholder="Search...">
+                </div>
+                <div class="profile">
+                    <button class="avatar" aria-label="User profile menu">U</button>
+                </div>
+            </div>
         </div>
-      </div>
-      <button class="theater-btn" id="theaterBtn">🌙 Theater</button>
-    </div>
-  </div>
-  <button class="close-btn" onclick="closePlayer()">Close</button>
-</div>
+    </header>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script>
-// ------------------- GLOBALS -------------------
-let allChannels = [];
-let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-let currentCategory = "All";
-let hlsInstance = null;
-let currentVideoName = "";
-let currentVideoUrl = "";
-let activeSaveInterval = null;
+    <!-- Hero Banner Section (Updated gradient) -->
+    <section class="hero" role="region" aria-label="Featured content">
+        <div class="hero-content">
+            <h2 class="hero-title">Stranger Things</h2>
+            <div class="hero-buttons">
+                <button class="btn btn-play" aria-label="Play Stranger Things">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    Play
+                </button>
+                <button class="btn btn-info" aria-label="More information">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    More Info
+                </button>
+            </div>
+            <p class="hero-description">
+                When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.
+            </p>
+            <div class="hero-meta">
+                <span class="match">98% Match</span>
+                <span class="year">2024</span>
+                <span class="rating">16+</span>
+                <span class="seasons">4 Seasons</span>
+            </div>
+        </div>
+        <div class="hero-overlay"></div>
+    </section>
 
-// DOM elements
-const header = document.getElementById('netflixHeader');
-const categoriesRow = document.getElementById('categoriesRow');
-const rowsContainer = document.getElementById('dynamicRowsContainer');
-const searchInput = document.getElementById('searchInput');
+    <!-- Movie Rows Section -->
+    <main class="content" role="main">
+        <!-- Trending Now Row with Numbers 1-7 -->
+        <section class="movie-row" aria-label="Trending now">
+            <h3 class="row-title">🔥 Trending Now</h3>
+            <div class="row-wrapper">
+                <div class="row-container">
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="rank" aria-hidden="true">1</div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>The Crown</h4>
+                            <div class="movie-stats">
+                                <span class="match-score">95% Match</span>
+                                <span class="duration">6 Seasons</span>
+                            </div>
+                        </div>
+                    </article>
 
-// ---------- STICKY HEADER SCROLL ----------
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 25) header.classList.add('scrolled');
-  else header.classList.remove('scrolled');
-});
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <div class="rank" aria-hidden="true">2</div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>Breaking Bad</h4>
+                            <div class="movie-stats">
+                                <span class="match-score">99% Match</span>
+                                <span class="duration">5 Seasons</span>
+                            </div>
+                        </div>
+                    </article>
 
-// ---------- FETCH & PARSE M3U ----------
-async function loadChannels() {
-  try {
-    const m3uUrl = "https://Niel01581.github.io/secret/viva.m3u";
-    const response = await fetch(m3uUrl);
-    const text = await response.text();
-    const lines = text.split("\n");
-    let channelsRaw = [];
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith("#EXTINF")) {
-        let name = lines[i].split(",")[1] || "Unknown";
-        let logoMatch = lines[i].match(/tvg-logo="([^"]+)"/);
-        let groupMatch = lines[i].match(/group-title="([^"]+)"/);
-        let logo = logoMatch ? logoMatch[1] : "https://placehold.co/150x120/1a1a1a/white?text=TV";
-        let group = groupMatch ? groupMatch[1] : "Others";
-        let stream = lines[i+1] ? lines[i+1].trim() : "";
-        if (stream && stream !== "") {
-          channelsRaw.push({ name: name.trim(), logo, group, stream });
-        }
-      }
-    }
-    allChannels = channelsRaw;
-    if (allChannels.length === 0) throw new Error("no channels");
-  } catch(e) {
-    console.warn("fallback demo data");
-    allChannels = [
-      { name: "Netflix Originals", logo: "https://placehold.co/150x120/e50914/white?text=Trend1", group: "Trending", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-      { name: "Action Movies", logo: "https://placehold.co/150x120/222/white?text=Action", group: "Movies", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-      { name: "Comedy Central", logo: "https://placehold.co/150x120/333/white?text=Comedy", group: "Comedy", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-      { name: "Sports HD", logo: "https://placehold.co/150x120/004e92/white?text=Sports", group: "Sports", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-      { name: "News 24/7", logo: "https://placehold.co/150x120/2c3e50/white?text=News", group: "News", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
-    ];
-    for(let i=0;i<12;i++) allChannels.push({ name: `Channel ${i+10}`, logo: `https://placehold.co/150x120/444/white?text=Ch${i+10}`, group: "Popular", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" });
-  }
-  buildCategories();
-  renderAllRows();
-}
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <div class="rank" aria-hidden="true">3</div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>Dark</h4>
+                            <div class="movie-stats">
+                                <span class="match-score">92% Match</span>
+                                <span class="duration">3 Seasons</span>
+                            </div>
+                        </div>
+                    </article>
 
-// ---------- CATEGORY CHIPS (Netflix style) ----------
-function buildCategories() {
-  let groups = ["All", "Favorites", ...new Set(allChannels.map(c => c.group))];
-  categoriesRow.innerHTML = "";
-  groups.forEach(grp => {
-    let chip = document.createElement("div");
-    chip.className = "category-chip";
-    chip.textContent = grp;
-    if (grp === "All") chip.classList.add("active");
-    chip.onclick = () => {
-      document.querySelectorAll(".category-chip").forEach(c => c.classList.remove("active"));
-      chip.classList.add("active");
-      currentCategory = grp;
-      renderAllRows();
-    };
-    categoriesRow.appendChild(chip);
-  });
-}
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                            <div class="rank" aria-hidden="true">4</div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>Squid Game</h4>
+                            <div class="movie-stats">
+                                <span class="match-score">97% Match</span>
+                                <span class="duration">1 Season</span>
+                            </div>
+                        </div>
+                    </article>
 
-// ---------- RENDER NETFLIX ROWS + TRENDING WITH NUMBERS 1 2 3 4 5 6 ----------
-function renderAllRows() {
-  rowsContainer.innerHTML = "";
-  
-  // Filter based on category & search
-  let searchTerm = searchInput.value.toLowerCase();
-  let filteredByCat = allChannels.filter(ch => {
-    if (currentCategory === "Favorites") return favorites.includes(ch.name);
-    if (currentCategory === "All") return true;
-    return ch.group === currentCategory;
-  });
-  let finalChannels = filteredByCat.filter(ch => ch.name.toLowerCase().includes(searchTerm));
-  
-  if (finalChannels.length === 0) {
-    rowsContainer.innerHTML = `<div style="padding: 60px 24px; text-align:center; color:#aaa;">✨ No channels found ✨</div>`;
-    return;
-  }
-  
-  // 1️⃣ TRENDING ROW (numbered 1 to 6) -> first 6 channels as trending
-  let trendingItems = finalChannels.slice(0, Math.min(12, finalChannels.length));
-  if (trendingItems.length > 0) {
-    let trendingRow = createNumberedRow("🔥 Trending Now", trendingItems, 1);
-    rowsContainer.appendChild(trendingRow);
-  }
-  
-  // 2️⃣ TOP PICKS ROW (numbered 1-6 again for variety) Next 6 channels (if exist)
-  let topPicks = finalChannels.slice(6, 12);
-  if (topPicks.length > 0) {
-    let picksRow = createNumberedRow("✨ Top Picks for You", topPicks, 1);
-    rowsContainer.appendChild(picksRow);
-  }
-  
-  // 3️⃣ Category based rows: group by genre (group)
-  let groupsMap = new Map();
-  finalChannels.forEach(ch => {
-    if (!groupsMap.has(ch.group)) groupsMap.set(ch.group, []);
-    groupsMap.get(ch.group).push(ch);
-  });
-  
-  // display each group as a separate row (with numbers starting from 1 again)
-  for (let [groupName, groupChannels] of groupsMap.entries()) {
-    if (groupName === "Trending") continue;
-    let row = createNumberedRow(`📺 ${groupName}`, groupChannels.slice(0, 15), 1);
-    rowsContainer.appendChild(row);
-  }
-  
-  // favorites row if category is not Favorites already
-  if (currentCategory !== "Favorites" && favorites.length > 0) {
-    let favChannels = finalChannels.filter(ch => favorites.includes(ch.name));
-    if (favChannels.length > 0) {
-      let favRow = createNumberedRow("⭐ My Favorites", favChannels.slice(0, 12), 1);
-      rowsContainer.appendChild(favRow);
-    }
-  }
-}
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                            <div class="rank" aria-hidden="true">5</div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>Money Heist</h4>
+                            <div class="movie-stats">
+                                <span class="match-score">94% Match</span>
+                                <span class="duration">5 Seasons</span>
+                            </div>
+                        </div>
+                    </article>
 
-// create a horizontal scroll row with numbered badges (1,2,3...) - NO "NETFLIX STYLE" BADGE
-function createNumberedRow(title, channelsList, startNumber = 1) {
-  const rowDiv = document.createElement('div');
-  rowDiv.className = 'row';
-  
-  const headerDiv = document.createElement('div');
-  headerDiv.className = 'row-header';
-  // Removed the "NETFLIX STYLE" badge div - now only the title is shown
-  headerDiv.innerHTML = `<div class="row-title">${title}</div>`;
-  rowDiv.appendChild(headerDiv);
-  
-  const scrollDiv = document.createElement('div');
-  scrollDiv.className = 'row-scroll';
-  
-  channelsList.forEach((channel, idx) => {
-    const cardNumber = startNumber + idx;  // 1,2,3,4...
-    const card = document.createElement('div');
-    card.className = 'trend-card';
-    const isFav = favorites.includes(channel.name);
-    const resumePos = localStorage.getItem(`resume_${channel.name}`);
-    const resumeHtml = resumePos ? `<div class="resume-badge-mini">▶️ Resume</div>` : '';
-    
-    card.innerHTML = `
-      <div class="card-number"><span>${cardNumber}</span></div>
-      <div class="fav-icon">${isFav ? "⭐" : "☆"}</div>
-      ${resumeHtml}
-      <img src="${channel.logo}" alt="${channel.name}" loading="lazy">
-      <div class="card-info">
-        <div class="card-title">${channel.name}</div>
-      </div>
-    `;
-    
-    const favIconDiv = card.querySelector('.fav-icon');
-    favIconDiv.onclick = (e) => {
-      e.stopPropagation();
-      toggleFavorite(channel.name);
-    };
-    
-    card.onclick = () => playChannel(channel.stream, channel.name);
-    scrollDiv.appendChild(card);
-  });
-  
-  rowDiv.appendChild(scrollDiv);
-  return rowDiv;
-}
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                            <div class="rank" aria-hidden="true">6</div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>Bridgerton</h4>
+                            <div class="movie-stats">
+                                <span class="match-score">89% Match</span>
+                                <span class="duration">2 Seasons</span>
+                            </div>
+                        </div>
+                    </article>
 
-// ---------- FAVORITE LOGIC ----------
-function toggleFavorite(name) {
-  if (favorites.includes(name)) {
-    favorites = favorites.filter(f => f !== name);
-  } else {
-    favorites.push(name);
-  }
-  localStorage.setItem("favorites", JSON.stringify(favorites));
-  renderAllRows();  // refresh all rows
-}
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);">
+                            <div class="rank" aria-hidden="true">7</div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>The Witcher</h4>
+                            <div class="movie-stats">
+                                <span class="match-score">91% Match</span>
+                                <span class="duration">3 Seasons</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
 
-// ---------- SEARCH ----------
-searchInput.addEventListener('input', () => {
-  renderAllRows();
-});
+        <!-- Popular on StreamFlix Row -->
+        <section class="movie-row" aria-label="Popular on StreamFlix">
+            <h3 class="row-title">⭐ Popular on StreamFlix</h3>
+            <div class="row-wrapper">
+                <div class="row-container">
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);"></div>
+                        <div class="movie-info">
+                            <h4>Wednesday</h4>
+                            <div class="movie-stats"><span class="match-score">91% Match</span><span>1 Season</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);"></div>
+                        <div class="movie-info">
+                            <h4>Ozark</h4>
+                            <div class="movie-stats"><span class="match-score">93% Match</span><span>4 Seasons</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%);"></div>
+                        <div class="movie-info">
+                            <h4>Peaky Blinders</h4>
+                            <div class="movie-stats"><span class="match-score">96% Match</span><span>6 Seasons</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);"></div>
+                        <div class="movie-info">
+                            <h4>The Umbrella Academy</h4>
+                            <div class="movie-stats"><span class="match-score">87% Match</span><span>3 Seasons</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);"></div>
+                        <div class="movie-info">
+                            <h4>Black Mirror</h4>
+                            <div class="movie-stats"><span class="match-score">90% Match</span><span>5 Seasons</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #fdcbf1 0%, #e6dee9 100%);"></div>
+                        <div class="movie-info">
+                            <h4>Succession</h4>
+                            <div class="movie-stats"><span class="match-score">94% Match</span><span>4 Seasons</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);"></div>
+                        <div class="movie-info">
+                            <h4>The Last of Us</h4>
+                            <div class="movie-stats"><span class="match-score">98% Match</span><span>1 Season</span></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
 
-// ---------- PLAYER & HLS + RESUME, QUALITY ----------
-function attachBuffering(video) {
-  const bufDiv = document.getElementById('bufferingIndicator');
-  video.addEventListener('waiting', () => bufDiv.style.display = 'block');
-  video.addEventListener('playing', () => bufDiv.style.display = 'none');
-  video.addEventListener('canplay', () => bufDiv.style.display = 'none');
-}
+        <!-- Continue Watching Row with Progress Bars (Resume Play ready) -->
+        <section class="movie-row" aria-label="Continue watching">
+            <h3 class="row-title">⏯️ Continue Watching</h3>
+            <div class="row-wrapper">
+                <div class="row-container">
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #48c6ef 0%, #6f86d6 100%);">
+                            <div class="progress-bar"><div class="progress-fill" style="width: 65%;"></div></div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>Narcos</h4>
+                            <div class="movie-stats"><span class="episode">S2:E5</span><span>38 min left</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #f77062 0%, #fe5196 100%);">
+                            <div class="progress-bar"><div class="progress-fill" style="width: 30%;"></div></div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>Vikings</h4>
+                            <div class="movie-stats"><span class="episode">S4:E12</span><span>52 min left</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);">
+                            <div class="progress-bar"><div class="progress-fill" style="width: 85%;"></div></div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>Lucifer</h4>
+                            <div class="movie-stats"><span class="episode">S3:E9</span><span>12 min left</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #3f2b96 0%, #a8c0ff 100%);">
+                            <div class="progress-bar"><div class="progress-fill" style="width: 45%;"></div></div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>The Office</h4>
+                            <div class="movie-stats"><span class="episode">S5:E3</span><span>15 min left</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);">
+                            <div class="progress-bar"><div class="progress-fill" style="width: 20%;"></div></div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>Suits</h4>
+                            <div class="movie-stats"><span class="episode">S7:E8</span><span>41 min left</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);">
+                            <div class="progress-bar"><div class="progress-fill" style="width: 70%;"></div></div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>House of Cards</h4>
+                            <div class="movie-stats"><span class="episode">S2:E11</span><span>28 min left</span></div>
+                        </div>
+                    </article>
+                    <article class="movie-card">
+                        <div class="movie-thumbnail" style="background: linear-gradient(135deg, #ffeaa7 0%, #fd79a8 100%);">
+                            <div class="progress-bar"><div class="progress-fill" style="width: 55%;"></div></div>
+                        </div>
+                        <div class="movie-info">
+                            <h4>Friends</h4>
+                            <div class="movie-stats"><span class="episode">S9:E4</span><span>22 min left</span></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
 
-function playChannel(streamUrl, channelName) {
-  currentVideoUrl = streamUrl;
-  currentVideoName = channelName;
-  const overlay = document.getElementById('overlay');
-  const video = document.getElementById('videoPlayer');
-  
-  if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
-  if (activeSaveInterval) clearInterval(activeSaveInterval);
-  
-  overlay.style.display = 'flex';
-  if (localStorage.getItem('theaterMode') === 'true') {
-    overlay.classList.add('theater-mode');
-    document.getElementById('theaterBtn').textContent = '🌙 Normal';
-  } else {
-    overlay.classList.remove('theater-mode');
-    document.getElementById('theaterBtn').textContent = '🌙 Theater';
-  }
-  
-  attachBuffering(video);
-  video.preload = 'auto';
-  
-  // resume
-  let savedTime = localStorage.getItem(`resume_${channelName}`);
-  const resumeHandler = () => {
-    if (savedTime && video.duration && video.duration > 10 && parseFloat(savedTime) < video.duration - 5) {
-      video.currentTime = parseFloat(savedTime);
-    }
-    video.removeEventListener('loadedmetadata', resumeHandler);
-  };
-  video.addEventListener('loadedmetadata', resumeHandler);
-  
-  activeSaveInterval = setInterval(() => {
-    if (video && !video.paused && video.currentTime > 25 && video.currentTime < video.duration - 3) {
-      localStorage.setItem(`resume_${channelName}`, video.currentTime);
-    }
-  }, 7000);
-  
-  video.addEventListener('ended', () => {
-    clearInterval(activeSaveInterval);
-    localStorage.removeItem(`resume_${channelName}`);
-  });
-  
-  const isHls = streamUrl.toLowerCase().includes('.m3u8');
-  if (isHls && Hls.isSupported()) {
-    const hls = new Hls({ maxBufferLength: 60, startLevel: -1, capLevelToPlayerSize: true });
-    hls.loadSource(streamUrl);
-    hls.attachMedia(video);
-    hlsInstance = hls;
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      const menu = document.getElementById('qualityMenu');
-      let levels = hls.levels;
-      let existing = menu.querySelectorAll('.quality-option:not([data-quality="auto"])');
-      existing.forEach(opt => opt.remove());
-      levels.forEach((level, idx) => {
-        if (level.height) {
-          let opt = document.createElement('div');
-          opt.className = 'quality-option';
-          opt.textContent = `${level.height}p`;
-          opt.setAttribute('data-quality', `${level.height}p`);
-          opt.onclick = () => {
-            hls.currentLevel = idx;
-            document.querySelectorAll('.quality-option').forEach(o => o.classList.remove('active'));
-            opt.classList.add('active');
-            document.getElementById('qualityMenu').classList.remove('show');
-          };
-          menu.appendChild(opt);
-        }
-      });
-    });
-  } else {
-    video.src = streamUrl;
-    video.load();
-  }
-  video.play().catch(e => console.log("autoplay block"));
-}
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer-content">
+            <div class="social-links">
+                <a href="#" aria-label="Facebook"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+                <a href="#" aria-label="Instagram"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg></a>
+                <a href="#" aria-label="Twitter"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg></a>
+                <a href="#" aria-label="YouTube"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+            </div>
+            <div class="footer-links">
+                <a href="#">Audio and Subtitles</a><a href="#">Help Center</a><a href="#">Gift Cards</a>
+                <a href="#">Media Center</a><a href="#">Investor Relations</a><a href="#">Jobs</a>
+                <a href="#">Terms of Use</a><a href="#">Privacy</a><a href="#">Legal Notices</a>
+                <a href="#">Cookie Preferences</a><a href="#">Corporate Information</a><a href="#">Contact Us</a>
+            </div>
+            <p class="copyright">© 2025 StreamFlix Clone. Premium Streaming Experience.</p>
+        </div>
+    </footer>
 
-function setQuality(level) {
-  if (!hlsInstance) return;
-  if (level === 'auto') hlsInstance.currentLevel = -1;
-  else {
-    let targetH = parseInt(level);
-    let idx = hlsInstance.levels.findIndex(l => l.height === targetH);
-    if (idx !== -1) hlsInstance.currentLevel = idx;
-  }
-  document.getElementById('qualityMenu').classList.remove('show');
-}
-
-function toggleTheaterMode() {
-  const overlay = document.getElementById('overlay');
-  overlay.classList.toggle('theater-mode');
-  const isTheater = overlay.classList.contains('theater-mode');
-  localStorage.setItem('theaterMode', isTheater);
-  document.getElementById('theaterBtn').textContent = isTheater ? '🌙 Normal' : '🌙 Theater';
-}
-
-function closePlayer() {
-  if (activeSaveInterval) clearInterval(activeSaveInterval);
-  const video = document.getElementById('videoPlayer');
-  if (currentVideoName && video && video.currentTime > 20) {
-    localStorage.setItem(`resume_${currentVideoName}`, video.currentTime);
-  }
-  video.pause();
-  video.src = "";
-  document.getElementById('overlay').style.display = 'none';
-  if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
-  document.getElementById('qualityMenu').classList.remove('show');
-}
-
-// quality menu handlers
-document.getElementById('qualityBtn').addEventListener('click', () => {
-  document.getElementById('qualityMenu').classList.toggle('show');
-});
-document.getElementById('theaterBtn').addEventListener('click', toggleTheaterMode);
-document.querySelectorAll('.quality-option').forEach(opt => {
-  opt.addEventListener('click', (e) => {
-    const qual = opt.getAttribute('data-quality');
-    if (qual) setQuality(qual);
-    else setQuality(opt.textContent.replace('p',''));
-  });
-});
-document.addEventListener('click', (e) => {
-  const menu = document.getElementById('qualityMenu');
-  const btn = document.getElementById('qualityBtn');
-  if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) menu.classList.remove('show');
-});
-
-// expose global helpers
-window.toggleFavorite = toggleFavorite;
-window.playChannel = playChannel;
-window.closePlayer = closePlayer;
-window.setQuality = setQuality;
-window.toggleTheaterMode = toggleTheaterMode;
-
-// Bootstrap
-loadChannels();
-</script>
+    <!-- Simple JS for sticky navbar scroll effect -->
+    <script>
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
 </body>
 </html>
