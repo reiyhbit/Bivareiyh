@@ -2,260 +2,398 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPTV Web App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>IPTV Web App | Netflix Style Header</title>
 
 <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  margin:0;
-  background:#0f0f0f;
-  color:white;
-  font-family:Arial;
+  margin: 0;
+  background: #0f0f0f;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
 }
 
-/* HEADER */
+/* ===== NETFLIX STYLE STICKY HEADER ===== */
 .header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:15px 20px;
-  background:#141414;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px;
+  background: transparent;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
 }
 
-.logo { font-size:20px; font-weight:bold; }
+/* Scrolled state — Netflix dark compact header */
+.header.scrolled {
+  background: #0a0a0a;
+  padding: 12px 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+
+.logo {
+  font-size: 1.6rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #e50914, #b20710);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+  transition: font-size 0.2s ease;
+}
+
+.header.scrolled .logo {
+  font-size: 1.3rem;
+}
 
 .search-box input {
-  padding:7px;
-  border-radius:5px;
-  border:none;
+  padding: 8px 14px;
+  border-radius: 30px;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  font-size: 0.85rem;
+  width: 160px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
 }
 
-/* CATEGORY BAR */
+.header.scrolled .search-box input {
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.search-box input:focus {
+  outline: none;
+  background: rgba(0,0,0,0.85);
+  width: 180px;
+  border: 1px solid #e50914;
+}
+
+/* Filler spacing for fixed header */
+.content-padder {
+  padding-top: 80px;
+}
+
+/* CATEGORY BAR — Netflix style */
 .categories {
-  display:flex;
-  overflow-x:auto;
-  padding:10px;
-  background:#1c1c1c;
+  display: flex;
+  overflow-x: auto;
+  padding: 12px 20px;
+  background: #0f0f0f;
+  gap: 8px;
+  scrollbar-width: thin;
+  position: sticky;
+  top: 70px;
+  z-index: 99;
+  backdrop-filter: blur(4px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.categories::-webkit-scrollbar {
+  height: 3px;
 }
 
 .category {
-  padding:6px 15px;
-  margin-right:8px;
-  background:#333;
-  border-radius:20px;
-  cursor:pointer;
-  white-space:nowrap;
+  padding: 6px 18px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 40px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
 .category.active {
-  background:#e50914;
+  background: #e50914;
+  color: white;
+  transform: scale(1.02);
 }
 
-/* SLIDER */
+/* SLIDER (hero) */
 .slider {
-  height:250px;
-  position:relative;
-  overflow:hidden;
+  height: 260px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 0 18px 18px;
+  margin: 0 0 12px 0;
 }
 
 .slide {
-  position:absolute;
-  width:100%;
-  height:100%;
-  background-size:cover;
-  background-position:center;
-  opacity:0;
-  transition:1s;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center 30%;
+  opacity: 0;
+  transition: opacity 1s cubic-bezier(0.2, 0.9, 0.4, 1);
 }
 
-.slide.active { opacity:1; }
+.slide.active {
+  opacity: 1;
+}
 
-/* GRID */
+/* GRID — modern cards */
 .grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:15px;
-  padding:20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  padding: 20px 20px 40px;
 }
 
 .card {
-  background:#1c1c1c;
-  border-radius:10px;
-  overflow:hidden;
-  cursor:pointer;
-  transition:.3s;
-  position:relative;
+  background: #181818;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-.card:hover { transform:scale(1.08); }
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.6);
+}
 
 .card img {
-  width:100%;
-  height:130px;
-  object-fit:contain;
-  background:black;
+  width: 100%;
+  height: 140px;
+  object-fit: contain;
+  background: #0a0a0a;
+  transition: transform 0.3s;
 }
 
 .card-title {
-  padding:6px;
-  font-size:13px;
-  text-align:center;
+  padding: 10px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  color: #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fav {
-  position:absolute;
-  top:5px;
-  right:5px;
-  font-size:18px;
-  cursor:pointer;
-}
-
-/* PLAYER */
-.overlay {
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:black;
-  display:none;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  z-index:999;
-}
-
-.video-container {
-  width:90%;
-  max-width:1100px;
-  position:relative;
-  background:#000;
-}
-
-video {
-  width:100%;
-  display:block;
-}
-
-/* Theater Mode */
-.theater-mode .video-container {
-  max-width:100%;
-  width:100%;
-}
-
-.theater-mode .close-btn {
-  position:fixed;
-  bottom:20px;
-  right:20px;
-}
-
-/* Player Controls Overlay */
-.player-controls {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px;
-  background:rgba(0,0,0,0.8);
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  opacity:0;
-  transition:0.3s;
-}
-
-.video-container:hover .player-controls {
-  opacity:1;
-}
-
-.quality-btn, .theater-btn {
-  background:#e50914;
-  color:white;
-  border:none;
-  padding:5px 10px;
-  border-radius:3px;
-  cursor:pointer;
-  margin:0 2px;
-  font-size:12px;
-}
-
-.quality-menu {
-  position:absolute;
-  bottom:40px;
-  left:10px;
-  background:#141414;
-  border-radius:5px;
-  display:none;
-  flex-direction:column;
-  min-width:100px;
-  border:1px solid #333;
-}
-
-.quality-menu.show {
-  display:flex;
-}
-
-.quality-option {
-  padding:8px 12px;
-  cursor:pointer;
-  font-size:12px;
-  transition:0.2s;
-}
-
-.quality-option:hover {
-  background:#e50914;
-}
-
-.quality-option.active {
-  background:#e50914;
-  font-weight:bold;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 22px;
+  cursor: pointer;
+  text-shadow: 0 0 3px black;
+  z-index: 2;
+  transition: 0.1s;
 }
 
 .resume-badge {
-  background:#e50914;
-  color:white;
-  padding:3px 8px;
-  border-radius:15px;
-  font-size:11px;
-  position:absolute;
-  top:5px;
-  left:5px;
-  z-index:2;
+  background: #e50914;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: bold;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  backdrop-filter: blur(2px);
+  letter-spacing: 0.5px;
+}
+
+/* PLAYER OVERLAY */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000e6;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 2000;
+  backdrop-filter: blur(8px);
+}
+
+.video-container {
+  width: 94%;
+  max-width: 1200px;
+  position: relative;
+  background: #000;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 40px rgba(0,0,0,0.6);
+}
+
+video {
+  width: 100%;
+  display: block;
+  background: black;
+}
+
+.theater-mode .video-container {
+  max-width: 100%;
+  width: 100%;
+  border-radius: 0;
+}
+
+.theater-mode .close-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+}
+
+.player-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.9), transparent);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  transition: 0.25s ease;
+}
+
+.video-container:hover .player-controls {
+  opacity: 1;
+}
+
+.quality-btn, .theater-btn {
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 30px;
+  cursor: pointer;
+  margin: 0 4px;
+  font-size: 12px;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.quality-menu {
+  position: absolute;
+  bottom: 45px;
+  left: 0;
+  background: #1a1a1a;
+  border-radius: 12px;
+  display: none;
+  flex-direction: column;
+  min-width: 110px;
+  border: 1px solid #333;
+  overflow: hidden;
+  z-index: 2200;
+}
+
+.quality-menu.show {
+  display: flex;
+}
+
+.quality-option {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.15s;
+  color: #eee;
+}
+
+.quality-option:hover {
+  background: #e50914;
+}
+
+.quality-option.active {
+  background: #e50914;
+  font-weight: bold;
 }
 
 .close-btn {
-  margin-top:10px;
-  padding:8px 15px;
-  background:red;
-  border:none;
-  color:white;
-  border-radius:5px;
-  cursor:pointer;
+  margin-top: 20px;
+  padding: 10px 22px;
+  background: #e50914;
+  border: none;
+  color: white;
+  border-radius: 40px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: 0.2s;
 }
 
 .buffering-indicator {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  background:rgba(0,0,0,0.7);
-  color:white;
-  padding:5px 15px;
-  border-radius:20px;
-  font-size:12px;
-  display:none;
-  z-index:10;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 6px 18px;
+  border-radius: 40px;
+  font-size: 13px;
+  display: none;
+  z-index: 15;
+  backdrop-filter: blur(6px);
+}
+
+/* responsive */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+    padding: 16px;
+  }
+  .slider {
+    height: 190px;
+  }
+  .logo {
+    font-size: 1.3rem;
+  }
+  .header.scrolled .logo {
+    font-size: 1.1rem;
+  }
+  .search-box input {
+    width: 130px;
+    font-size: 0.75rem;
+  }
+  .categories {
+    top: 66px;
+    padding: 10px 16px;
+  }
 }
 </style>
 </head>
 <body>
 
-<div class="header">
+<!-- NETFLIX INSPIRED STICKY HEADER (compact on scroll) -->
+<div class="header" id="netflixHeader">
   <div class="logo">BivaReiyh</div>
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="Search channel...">
   </div>
 </div>
+
+<div class="content-padder"></div>
 
 <div class="categories" id="categories"></div>
 <div class="slider" id="slider"></div>
@@ -263,20 +401,20 @@ video {
 
 <div class="overlay" id="overlay">
   <div class="video-container">
-    <video id="videoPlayer" controls autoplay preload="auto"></video>
+    <video id="videoPlayer" controls autoplay preload="auto" playsinline></video>
     <div class="buffering-indicator" id="bufferingIndicator">Buffering ⚡</div>
     <div class="player-controls">
       <div style="position:relative">
-        <button class="quality-btn" onclick="toggleQualityMenu()">⚙️ Auto</button>
+        <button class="quality-btn" id="qualityBtn">⚙️ Auto</button>
         <div class="quality-menu" id="qualityMenu">
-          <div class="quality-option active" onclick="setQuality('auto')">Auto</div>
-          <div class="quality-option" onclick="setQuality('1080p')">1080p</div>
-          <div class="quality-option" onclick="setQuality('720p')">720p</div>
-          <div class="quality-option" onclick="setQuality('480p')">480p</div>
+          <div class="quality-option active" data-quality="auto">Auto</div>
+          <div class="quality-option" data-quality="1080p">1080p</div>
+          <div class="quality-option" data-quality="720p">720p</div>
+          <div class="quality-option" data-quality="480p">480p</div>
         </div>
       </div>
       <div>
-        <button class="theater-btn" onclick="toggleTheaterMode()">🌙 Theater</button>
+        <button class="theater-btn" id="theaterBtn">🌙 Theater</button>
       </div>
     </div>
   </div>
@@ -284,337 +422,365 @@ video {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.4.0/shaka-player.compiled.js"></script>
 
 <script>
-let channels=[];
-let currentCategory="All";
-let favorites=JSON.parse(localStorage.getItem("favorites"))||[];
+// ---------- GLOBALS ----------
+let channels = [];
+let currentCategory = "All";
+let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 let hlsInstance = null;
-let currentVideoUrl = "";
 let currentVideoName = "";
-let bufferingTimer = null;
+let currentVideoUrl = "";
 
-(async function(){
-const url="https://Niel01581.github.io/secret/viva.m3u";
-const text=await fetch(url).then(r=>r.text());
-const lines=text.split("\n");
+// ---------- NETFLIX STICKY HEADER (SCROLL) ----------
+const header = document.getElementById('netflixHeader');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 30) {
+    header.classList.add('scrolled');
+  } else {
+    header.classList.remove('scrolled');
+  }
+});
 
-for(let i=0;i<lines.length;i++){
- if(lines[i].startsWith("#EXTINF")){
-  let name=lines[i].split(",")[1]||"Unknown";
-  let logoMatch=lines[i].match(/tvg-logo="([^"]+)"/);
-  let groupMatch=lines[i].match(/group-title="([^"]+)"/);
-  let logo=logoMatch?logoMatch[1]:"https://via.placeholder.com/150x120";
-  let group=groupMatch?groupMatch[1]:"Others";
-  let stream=lines[i+1]||"";
-  channels.push({name,logo,group,stream});
- }
-}
-
-buildCategories();
-buildSlider();
-renderGrid();
-checkResumePosition();
+// ---------- FETCH M3U ----------
+(async function() {
+  try {
+    const url = "https://Niel01581.github.io/secret/viva.m3u";
+    const text = await fetch(url).then(r => r.text());
+    const lines = text.split("\n");
+    
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith("#EXTINF")) {
+        let name = lines[i].split(",")[1] || "Unknown";
+        let logoMatch = lines[i].match(/tvg-logo="([^"]+)"/);
+        let groupMatch = lines[i].match(/group-title="([^"]+)"/);
+        let logo = logoMatch ? logoMatch[1] : "https://via.placeholder.com/150x120?text=No+Logo";
+        let group = groupMatch ? groupMatch[1] : "Others";
+        let stream = lines[i + 1] || "";
+        if (stream && stream.trim() !== "") {
+          channels.push({ name: name.trim(), logo, group, stream: stream.trim() });
+        }
+      }
+    }
+    buildCategories();
+    buildSlider();
+    renderGrid();
+    checkResumePosition();
+  } catch(e) {
+    console.error("Error loading M3U", e);
+    // dummy fallback if offline / error
+    channels = [{
+      name: "Sample Channel", logo: "https://via.placeholder.com/150x120?text=Sample", group: "Demo", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+    }];
+    buildCategories();
+    buildSlider();
+    renderGrid();
+  }
 })();
 
-/* CATEGORY */
-function buildCategories(){
-let cats=["All","Favorites",...new Set(channels.map(c=>c.group))];
-let container=document.getElementById("categories");
-cats.forEach(cat=>{
- let div=document.createElement("div");
- div.className="category";
- div.textContent=cat;
- if(cat==="All") div.classList.add("active");
- div.onclick=()=>{
-  document.querySelectorAll(".category").forEach(c=>c.classList.remove("active"));
-  div.classList.add("active");
-  currentCategory=cat;
+// ---------- CATEGORIES (with 'Favorites' support) ----------
+function buildCategories() {
+  let cats = ["All", "Favorites", ...new Set(channels.map(c => c.group))];
+  let container = document.getElementById("categories");
+  container.innerHTML = "";
+  cats.forEach(cat => {
+    let div = document.createElement("div");
+    div.className = "category";
+    div.textContent = cat;
+    if (cat === "All") div.classList.add("active");
+    div.onclick = () => {
+      document.querySelectorAll(".category").forEach(c => c.classList.remove("active"));
+      div.classList.add("active");
+      currentCategory = cat;
+      renderGrid();
+    };
+    container.appendChild(div);
+  });
+}
+
+// ---------- SLIDER (hero banners) ----------
+function buildSlider() {
+  let slider = document.getElementById("slider");
+  slider.innerHTML = "";
+  let topShows = channels.slice(0, 6);
+  topShows.forEach((c, i) => {
+    let slide = document.createElement("div");
+    slide.className = "slide";
+    slide.style.backgroundImage = `url('${c.logo}')`;
+    slide.style.backgroundSize = "contain";
+    slide.style.backgroundColor = "#0a0a0a";
+    if (i === 0) slide.classList.add("active");
+    slider.appendChild(slide);
+  });
+  let index = 0;
+  setInterval(() => {
+    let slides = document.querySelectorAll(".slide");
+    if (slides.length === 0) return;
+    slides[index].classList.remove("active");
+    index = (index + 1) % slides.length;
+    slides[index].classList.add("active");
+  }, 5000);
+}
+
+// ---------- RENDER GRID (with search & favorites) ----------
+function renderGrid() {
+  let grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  let searchTerm = document.getElementById("searchInput").value.toLowerCase();
+  let filtered = channels.filter(c => {
+    if (currentCategory === "Favorites") return favorites.includes(c.name);
+    if (currentCategory === "All") return true;
+    return c.group === currentCategory;
+  }).filter(c => c.name.toLowerCase().includes(searchTerm));
+  
+  filtered.forEach(c => {
+    let card = document.createElement("div");
+    card.className = "card";
+    let resumePos = localStorage.getItem(`resume_${c.name}`);
+    let resumeBadge = resumePos ? '<div class="resume-badge">▶️ Resume</div>' : '';
+    card.innerHTML = `
+      ${resumeBadge}
+      <div class="fav">${favorites.includes(c.name) ? "⭐" : "☆"}</div>
+      <img src="${c.logo}" alt="${c.name}" loading="lazy">
+      <div class="card-title">${c.name}</div>
+    `;
+    card.querySelector(".fav").onclick = (e) => {
+      e.stopPropagation();
+      toggleFavorite(c.name);
+    };
+    card.onclick = () => playChannel(c.stream, c.name);
+    grid.appendChild(card);
+  });
+}
+
+// Search listener
+document.getElementById("searchInput").addEventListener("input", renderGrid);
+
+function toggleFavorite(name) {
+  if (favorites.includes(name)) {
+    favorites = favorites.filter(f => f !== name);
+  } else {
+    favorites.push(name);
+  }
+  localStorage.setItem("favorites", JSON.stringify(favorites));
   renderGrid();
- };
- container.appendChild(div);
-});
 }
 
-/* SLIDER */
-function buildSlider(){
-let slider=document.getElementById("slider");
-channels.slice(0,5).forEach((c,i)=>{
- let slide=document.createElement("div");
- slide.className="slide";
- slide.style.backgroundImage=`url('${c.logo}')`;
- if(i===0) slide.classList.add("active");
- slider.appendChild(slide);
-});
-let index=0;
-setInterval(()=>{
- let slides=document.querySelectorAll(".slide");
- slides[index].classList.remove("active");
- index=(index+1)%slides.length;
- slides[index].classList.add("active");
-},4000);
+// ---------- BUFFERING UI ----------
+function attachBuffering(video) {
+  let buffIcon = document.getElementById("bufferingIndicator");
+  video.addEventListener("waiting", () => { buffIcon.style.display = "block"; });
+  video.addEventListener("playing", () => { buffIcon.style.display = "none"; });
+  video.addEventListener("canplay", () => { buffIcon.style.display = "none"; });
 }
 
-/* GRID */
-function renderGrid(){
-let grid=document.getElementById("grid");
-grid.innerHTML="";
-let search=document.getElementById("searchInput").value.toLowerCase();
-
-channels
-.filter(c=>{
- if(currentCategory==="Favorites") return favorites.includes(c.name);
- if(currentCategory==="All") return true;
- return c.group===currentCategory;
-})
-.filter(c=>c.name.toLowerCase().includes(search))
-.forEach(c=>{
- let card=document.createElement("div");
- card.className="card";
- 
- // Check if this channel has resume position
- let resumePos = localStorage.getItem(`resume_${c.name}`);
- let resumeBadge = resumePos ? '<div class="resume-badge">▶️ Resume</div>' : '';
- 
- card.innerHTML=`
-  ${resumeBadge}
-  <div class="fav">${favorites.includes(c.name)?"⭐":"☆"}</div>
-  <img src="${c.logo}">
-  <div class="card-title">${c.name}</div>
- `;
- card.querySelector(".fav").onclick=(e)=>{
-  e.stopPropagation();
-  toggleFavorite(c.name);
- };
- card.onclick=()=>playChannel(c.stream,c.name);
- grid.appendChild(card);
-});
-}
-
-/* SEARCH */
-document.getElementById("searchInput").oninput=renderGrid;
-
-/* FAVORITES */
-function toggleFavorite(name){
- if(favorites.includes(name)){
-  favorites=favorites.filter(f=>f!==name);
- } else favorites.push(name);
- localStorage.setItem("favorites",JSON.stringify(favorites));
- renderGrid();
-}
-
-/* BUFFERING INDICATOR */
-function setupBufferingListener(video) {
-  video.addEventListener('waiting', () => {
-    document.getElementById('bufferingIndicator').style.display = 'block';
-  });
-  
-  video.addEventListener('playing', () => {
-    document.getElementById('bufferingIndicator').style.display = 'none';
-  });
-  
-  video.addEventListener('canplay', () => {
-    document.getElementById('bufferingIndicator').style.display = 'none';
-  });
-}
-
-/* PLAYER - Updated with new features */
-function playChannel(url,name){
- localStorage.setItem("lastWatched",name);
- currentVideoUrl = url;
- currentVideoName = name;
- 
- let overlay=document.getElementById("overlay");
- let video=document.getElementById("videoPlayer");
- 
- // Clean up previous HLS instance
- if (hlsInstance) {
-   hlsInstance.destroy();
-   hlsInstance = null;
- }
- 
- overlay.style.display="flex";
- 
- // Add theater mode class if it was enabled
- if (localStorage.getItem('theaterMode') === 'true') {
-   overlay.classList.add('theater-mode');
- }
- 
- setupBufferingListener(video);
- 
- // Faster loading with preload
- video.preload = 'auto';
- 
- // Check if there's a saved position
- let savedTime = localStorage.getItem(`resume_${name}`);
- if (savedTime) {
-   video.addEventListener('loadedmetadata', function onMetadata() {
-     video.currentTime = parseFloat(savedTime);
-     video.removeEventListener('loadedmetadata', onMetadata);
-   });
- }
- 
- // Save position periodically
- video.addEventListener('timeupdate', () => {
-   if (video.currentTime > 30) { // Save after 30 seconds
-     localStorage.setItem(`resume_${name}`, video.currentTime);
-   }
- });
- 
- // Auto quality selection based on network speed
- if (navigator.connection) {
-   let connection = navigator.connection;
-   let effectiveType = connection.effectiveType;
-   
-   if (effectiveType === 'slow-2g' || effectiveType === '2g') {
-     setQuality('480p');
-   } else if (effectiveType === '3g') {
-     setQuality('720p');
-   } else {
-     setQuality('auto');
-   }
- }
- 
- // Check if it's an MP4 file
- let isMp4 = url.toLowerCase().includes('.mp4') || 
-              url.toLowerCase().includes('.mkv') || 
-              url.toLowerCase().includes('.avi') ||
-              url.toLowerCase().includes('.mov') ||
-              url.match(/\.(mp4|mkv|avi|mov|webm|m4v)(\?.*)?$/i);
- 
- // Check if it's HLS (m3u8)
- let isHls = url.toLowerCase().includes('.m3u8') || 
-             url.match(/\.m3u8(\?.*)?$/i);
- 
- if (isHls) {
-   // HLS playback with quality control
-   if (Hls.isSupported()) {
-     let hls = new Hls({
-       maxBufferLength: 60, // Faster buffering
-       maxMaxBufferLength: 120,
-       startLevel: -1 // Auto quality
-     });
-     
-     hls.loadSource(url);
-     hls.attachMedia(video);
-     hlsInstance = hls;
-     
-     // Quality levels available
-     hls.on(Hls.Events.MANIFEST_PARSED, function() {
-       let qualityMenu = document.getElementById('qualityMenu');
-       let levels = hls.levels;
-       
-       // Clear existing options except Auto
-       while (qualityMenu.children.length > 1) {
-         qualityMenu.removeChild(qualityMenu.lastChild);
-       }
-       
-       levels.forEach((level, index) => {
-         let height = level.height;
-         let option = document.createElement('div');
-         option.className = 'quality-option';
-         option.textContent = height + 'p';
-         option.onclick = () => {
-           setHlsQuality(index);
-           document.querySelectorAll('.quality-option').forEach(opt => opt.classList.remove('active'));
-           option.classList.add('active');
-         };
-         qualityMenu.appendChild(option);
-       });
-     });
-     
-   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-     video.src = url;
-   }
- } else if (isMp4) {
-   // MP4 or direct video file playback
-   video.src = url;
-   video.load();
- } else {
-   video.src = url;
-   video.load();
- }
- 
- video.requestFullscreen().catch(()=>{});
-}
-
-/* QUALITY CONTROL */
+// ---------- QUALITY SELECTION + THEATER MODE ----------
 function toggleQualityMenu() {
-  document.getElementById('qualityMenu').classList.toggle('show');
+  document.getElementById("qualityMenu").classList.toggle("show");
 }
 
 function setQuality(level) {
-  document.getElementById('qualityMenu').classList.remove('show');
+  document.getElementById("qualityMenu").classList.remove("show");
+  if (!hlsInstance) return;
+  if (level === "auto") {
+    hlsInstance.currentLevel = -1;
+  } else {
+    let targetHeight = parseInt(level);
+    let idx = hlsInstance.levels.findIndex(l => l.height === targetHeight);
+    if (idx !== -1) hlsInstance.currentLevel = idx;
+  }
+  // update active style
+  document.querySelectorAll(".quality-option").forEach(opt => opt.classList.remove("active"));
+  let activeOpt = Array.from(document.querySelectorAll(".quality-option")).find(opt => opt.getAttribute("data-quality") === level);
+  if (activeOpt) activeOpt.classList.add("active");
+}
+
+function setHlsQualityByIndex(levelIndex) {
+  if (hlsInstance) hlsInstance.currentLevel = levelIndex;
+}
+
+let theaterActive = false;
+function toggleTheaterMode() {
+  let overlayDiv = document.getElementById("overlay");
+  overlayDiv.classList.toggle("theater-mode");
+  theaterActive = overlayDiv.classList.contains("theater-mode");
+  localStorage.setItem("theaterMode", theaterActive);
+  let btn = document.getElementById("theaterBtn");
+  btn.textContent = theaterActive ? "🌙 Normal" : "🌙 Theater";
+}
+
+// Resume & smarter playback
+function playChannel(streamUrl, channelName) {
+  currentVideoUrl = streamUrl;
+  currentVideoName = channelName;
+  let overlay = document.getElementById("overlay");
+  let video = document.getElementById("videoPlayer");
   
   if (hlsInstance) {
-    if (level === 'auto') {
-      hlsInstance.currentLevel = -1;
-    } else if (level === '1080p') {
-      hlsInstance.currentLevel = hlsInstance.levels.findIndex(l => l.height === 1080);
-    } else if (level === '720p') {
-      hlsInstance.currentLevel = hlsInstance.levels.findIndex(l => l.height === 720);
-    } else if (level === '480p') {
-      hlsInstance.currentLevel = hlsInstance.levels.findIndex(l => l.height === 480);
+    hlsInstance.destroy();
+    hlsInstance = null;
+  }
+  
+  overlay.style.display = "flex";
+  if (localStorage.getItem("theaterMode") === "true") {
+    overlay.classList.add("theater-mode");
+    document.getElementById("theaterBtn").textContent = "🌙 Normal";
+  } else {
+    overlay.classList.remove("theater-mode");
+    document.getElementById("theaterBtn").textContent = "🌙 Theater";
+  }
+  
+  attachBuffering(video);
+  video.preload = "auto";
+  
+  // resume logic
+  let savedTime = localStorage.getItem(`resume_${channelName}`);
+  let resumeHandler = () => {
+    if (savedTime && !isNaN(parseFloat(savedTime)) && video.duration && video.duration > 30) {
+      video.currentTime = parseFloat(savedTime);
+    }
+    video.removeEventListener("loadedmetadata", resumeHandler);
+  };
+  video.addEventListener("loadedmetadata", resumeHandler);
+  
+  // save periodically
+  let saveInterval = setInterval(() => {
+    if (video && !video.paused && video.currentTime > 30 && video.currentTime < video.duration - 5) {
+      localStorage.setItem(`resume_${channelName}`, video.currentTime);
+    }
+  }, 8000);
+  
+  video.addEventListener("ended", () => {
+    clearInterval(saveInterval);
+    localStorage.removeItem(`resume_${channelName}`);
+  });
+  video.addEventListener("pause", () => { /* keep */ });
+  
+  // Network aware quality pre-selection
+  if (navigator.connection) {
+    let type = navigator.connection.effectiveType;
+    if (type === "slow-2g" || type === "2g") {
+      // keep auto but hint lower
     }
   }
-}
-
-function setHlsQuality(level) {
-  if (hlsInstance) {
-    hlsInstance.currentLevel = level;
-  }
-}
-
-/* THEATER MODE */
-function toggleTheaterMode() {
-  let overlay = document.getElementById('overlay');
-  overlay.classList.toggle('theater-mode');
-  let theaterMode = overlay.classList.contains('theater-mode');
-  localStorage.setItem('theaterMode', theaterMode);
   
-  // Update button text
-  let btn = document.querySelector('.theater-btn');
-  btn.textContent = theaterMode ? '🌙 Normal' : '🌙 Theater';
+  let isHls = streamUrl.toLowerCase().includes(".m3u8");
+  let isMp4 = /\.(mp4|mkv|avi|mov|webm)(\?|$)/i.test(streamUrl);
+  
+  if (isHls && Hls.isSupported()) {
+    let hls = new Hls({
+      maxBufferLength: 60,
+      startLevel: -1,
+      capLevelToPlayerSize: true,
+    });
+    hls.loadSource(streamUrl);
+    hls.attachMedia(video);
+    hlsInstance = hls;
+    
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      let qualityMenuDiv = document.getElementById("qualityMenu");
+      // rebuild quality list with actual levels
+      let levels = hls.levels;
+      let existingOptions = qualityMenuDiv.querySelectorAll(".quality-option");
+      if (levels.length > 0) {
+        // clear old ones except the auto
+        Array.from(existingOptions).forEach(opt => {
+          if (opt.getAttribute("data-quality") !== "auto") opt.remove();
+        });
+        levels.forEach((level, idx) => {
+          let height = level.height;
+          if (height) {
+            let opt = document.createElement("div");
+            opt.className = "quality-option";
+            opt.textContent = `${height}p`;
+            opt.setAttribute("data-quality", `${height}p`);
+            opt.onclick = () => {
+              setHlsQualityByIndex(idx);
+              document.querySelectorAll(".quality-option").forEach(o => o.classList.remove("active"));
+              opt.classList.add("active");
+              document.getElementById("qualityMenu").classList.remove("show");
+            };
+            qualityMenuDiv.appendChild(opt);
+          }
+        });
+      }
+    });
+    
+    hls.on(Hls.Events.ERROR, (evt, data) => {
+      if (data.fatal) {
+        console.warn("HLS fatal error, trying reload fallback");
+        video.src = streamUrl;
+      }
+    });
+  } else if (isMp4 || video.canPlayType("video/mp4")) {
+    video.src = streamUrl;
+    video.load();
+  } else {
+    video.src = streamUrl;
+    video.load();
+  }
+  
+  video.play().catch(e => console.log("autoplay blocked", e));
+  video.setAttribute("playsinline", "true");
+  
+  // clear saved interval on close later
+  window.__currentSaveInterval = saveInterval;
+  window.__currentVideoCleanup = () => {
+    clearInterval(saveInterval);
+    if (video && video.currentTime > 30) localStorage.setItem(`resume_${channelName}`, video.currentTime);
+  };
 }
 
-/* RESUME POSITION */
-function checkResumePosition() {
-  let lastWatched = localStorage.getItem('lastWatched');
-  if (lastWatched) {
-    console.log('Last watched:', lastWatched);
+function closePlayer() {
+  let video = document.getElementById("videoPlayer");
+  if (window.__currentSaveInterval) clearInterval(window.__currentSaveInterval);
+  if (currentVideoName && video && video.currentTime > 30) {
+    localStorage.setItem(`resume_${currentVideoName}`, video.currentTime);
+  }
+  video.pause();
+  video.src = "";
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("qualityMenu").classList.remove("show");
+  if (hlsInstance) {
+    hlsInstance.destroy();
+    hlsInstance = null;
   }
 }
 
-function closePlayer(){
- let video=document.getElementById("videoPlayer");
- 
- // Save final position before closing
- if (currentVideoName && video.currentTime > 30) {
-   localStorage.setItem(`resume_${currentVideoName}`, video.currentTime);
- }
- 
- video.pause();
- video.src="";
- document.getElementById('qualityMenu').classList.remove('show');
- document.getElementById('overlay').style.display="none";
- 
- // Clean up HLS
- if (hlsInstance) {
-   hlsInstance.destroy();
-   hlsInstance = null;
- }
+function checkResumePosition() {
+  let last = localStorage.getItem("lastWatched");
+  if (last) console.log("resume available for", last);
 }
 
-// Close quality menu when clicking outside
-document.addEventListener('click', function(event) {
-  let menu = document.getElementById('qualityMenu');
-  let btn = document.querySelector('.quality-btn');
-  if (!btn.contains(event.target) && !menu.contains(event.target)) {
-    menu.classList.remove('show');
+// quality button event binding
+document.getElementById("qualityBtn").addEventListener("click", toggleQualityMenu);
+document.getElementById("theaterBtn").addEventListener("click", toggleTheaterMode);
+document.querySelectorAll(".quality-option").forEach(opt => {
+  opt.addEventListener("click", (e) => {
+    let quality = opt.getAttribute("data-quality");
+    if (quality) setQuality(quality);
+    else if (opt.textContent.includes("p")) {
+      let val = opt.textContent.replace("p", "");
+      setQuality(val);
+    }
+    document.getElementById("qualityMenu").classList.remove("show");
+  });
+});
+
+// global click to close quality menu
+document.addEventListener("click", (e) => {
+  let menu = document.getElementById("qualityMenu");
+  let btn = document.getElementById("qualityBtn");
+  if (menu && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+    menu.classList.remove("show");
   }
 });
-</script>
 
+window.toggleQualityMenu = toggleQualityMenu;
+window.setQuality = setQuality;
+window.toggleTheaterMode = toggleTheaterMode;
+window.closePlayer = closePlayer;
+window.playChannel = playChannel;
+</script>
 </body>
 </html>
