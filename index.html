@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title> | Trending Rows</title>
+<title>Netflix Style IPTV | Trending Rows</title>
 <style>
 * {
   margin: 0;
@@ -123,14 +123,6 @@ body {
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.3px;
-}
-
-.row-badge {
-  background: #e50914;
-  padding: 4px 10px;
-  border-radius: 30px;
-  font-size: 0.7rem;
-  font-weight: bold;
 }
 
 /* horizontal scroll container */
@@ -502,7 +494,7 @@ function renderAllRows() {
     rowsContainer.appendChild(trendingRow);
   }
   
-  // 2️⃣ TOP PICKS ROW (numbered 1-6 again but for variety) Next 6 channels (if exist)
+  // 2️⃣ TOP PICKS ROW (numbered 1-6 again for variety) Next 6 channels (if exist)
   let topPicks = finalChannels.slice(6, 12);
   if (topPicks.length > 0) {
     let picksRow = createNumberedRow("✨ Top Picks for You", topPicks, 1);
@@ -533,14 +525,15 @@ function renderAllRows() {
   }
 }
 
-// create a horizontal scroll row with numbered badges (1,2,3...)
+// create a horizontal scroll row with numbered badges (1,2,3...) - NO "NETFLIX STYLE" BADGE
 function createNumberedRow(title, channelsList, startNumber = 1) {
   const rowDiv = document.createElement('div');
   rowDiv.className = 'row';
   
   const headerDiv = document.createElement('div');
   headerDiv.className = 'row-header';
-  headerDiv.innerHTML = `<div class="row-title">${title}</div><div class="row-badge">NETFLIX STYLE</div>`;
+  // Removed the "NETFLIX STYLE" badge div - now only the title is shown
+  headerDiv.innerHTML = `<div class="row-title">${title}</div>`;
   rowDiv.appendChild(headerDiv);
   
   const scrollDiv = document.createElement('div');
