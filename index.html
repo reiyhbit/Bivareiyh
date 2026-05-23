@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Netflix Style IPTV | Trending Rows</title>
+<title>Netflix Style IPTV | Trending Grid + Rows</title>
 <style>
 * {
   margin: 0;
@@ -106,9 +106,9 @@ body {
   transform: scale(1.02);
 }
 
-/* ========== NETFLIX STYLE ROWS WITH NUMBERED TRENDING ========== */
+/* ========== ROW STYLES ========== */
 .row {
-  margin-bottom: 40px;
+  margin-bottom: 48px;
   padding: 0 24px;
 }
 
@@ -116,7 +116,7 @@ body {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .row-title {
@@ -125,24 +125,65 @@ body {
   letter-spacing: -0.3px;
 }
 
-/* horizontal scroll container */
-.row-scroll {
-  display: flex;
-  overflow-x: auto;
-  gap: 12px;
-  scroll-behavior: smooth;
-  padding-bottom: 12px;
-  scrollbar-width: thin;
+/* GRID LAYOUT - 4 rows below + trending grid */
+.grid-4rows {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  width: 100%;
 }
 
-.row-scroll::-webkit-scrollbar {
-  height: 5px;
+/* Responsive grid: on large screens shows 6 columns, medium 4, small 2 */
+@media (min-width: 1200px) {
+  .grid-4rows {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+@media (min-width: 900px) and (max-width: 1199px) {
+  .grid-4rows {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+@media (min-width: 600px) and (max-width: 899px) {
+  .grid-4rows {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 599px) {
+  .grid-4rows {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-/* Netflix card with number badge for trending */
+/* Trending Now specific grid - exactly 6 items wide on desktop */
+.trending-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+@media (min-width: 1100px) {
+  .trending-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+@media (max-width: 900px) and (min-width: 600px) {
+  .trending-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 599px) {
+  .trending-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Netflix card style */
 .trend-card {
   position: relative;
-  flex: 0 0 150px;
   background: #181818;
   border-radius: 12px;
   overflow: hidden;
@@ -164,6 +205,7 @@ body {
   display: block;
 }
 
+/* Number badge */
 .card-number {
   position: absolute;
   top: -8px;
@@ -180,7 +222,6 @@ body {
   opacity: 0.9;
 }
 
-/* better number visibility */
 .trend-card .card-number span {
   background: linear-gradient(145deg, #e50914, #b20710);
   background-clip: text;
@@ -232,7 +273,7 @@ body {
   z-index: 3;
 }
 
-/* ========== PLAYER OVERLAY (NETFLIX STYLE) ========== */
+/* ========== PLAYER OVERLAY ========== */
 .overlay {
   position: fixed;
   top: 0;
@@ -348,41 +389,10 @@ video {
 }
 
 @media (max-width: 700px) {
-  .trend-card { flex: 0 0 130px; }
   .trend-card img { height: 120px; }
   .row-title { font-size: 1.2rem; }
   .main-content { padding-top: 75px; }
   .categories-row { padding: 0 16px 12px 16px; top: 64px; }
-}
-
-/* New GRID layout for Trending Now - exactly 6 items in a responsive grid */
-.trending-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 16px;
-  margin-top: 8px;
-  margin-bottom: 16px;
-  max-width: 100%;
-}
-.trending-grid .trend-card {
-  flex: unset;
-  width: 100%;
-  margin: 0;
-}
-@media (min-width: 1100px) {
-  .trending-grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
-}
-@media (max-width: 900px) and (min-width: 600px) {
-  .trending-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-@media (max-width: 599px) {
-  .trending-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 </style>
 </head>
@@ -467,19 +477,19 @@ async function loadChannels() {
     if (allChannels.length === 0) throw new Error("no channels");
   } catch(e) {
     console.warn("fallback demo data");
-    // generate rich demo content to show trending grid properly
+    // Create rich demo channels with different groups
     allChannels = [];
-    const groupsList = ["Trending", "Movies", "Sports", "News", "Comedy", "Kids", "Music", "Lifestyle"];
-    for (let i = 1; i <= 36; i++) {
-      let group = groupsList[i % groupsList.length];
+    const groups = ["Action", "Drama", "Comedy", "Thriller", "Sci-Fi", "Romance", "Documentary", "Animation"];
+    for (let i = 1; i <= 48; i++) {
+      let group = groups[i % groups.length];
       let name = "";
-      if (i === 1) name = "Squid Game: Challenge";
-      else if (i === 2) name = "The Crown S6";
-      else if (i === 3) name = "Stranger Things 5";
-      else if (i === 4) name = "Wednesday S2";
-      else if (i === 5) name = "Money Heist Berlin";
-      else if (i === 6) name = "Bridgerton S3";
-      else name = `${group} Channel ${i}`;
+      if (i === 1) name = "Squid Game";
+      else if (i === 2) name = "The Crown";
+      else if (i === 3) name = "Stranger Things";
+      else if (i === 4) name = "Wednesday";
+      else if (i === 5) name = "Money Heist";
+      else if (i === 6) name = "Bridgerton";
+      else name = `${group} Hit ${i}`;
       allChannels.push({
         name: name,
         logo: `https://placehold.co/150x120/${Math.floor(Math.random()*0xffffff).toString(16)}/white?text=${encodeURIComponent(name.slice(0,8))}`,
@@ -487,16 +497,15 @@ async function loadChannels() {
         stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
       });
     }
-    // Ensure we have at least 6 for trending grid
-    if(allChannels.length < 6) {
-      for(let i=0;i<6;i++) allChannels.push({ name: `Hot Show ${i+1}`, logo: "https://placehold.co/150x120/e50914/white?text=Trend", group: "Trending", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" });
+    if(allChannels.length < 30) {
+      for(let i=0;i<30;i++) allChannels.push({ name: `Channel ${i+1}`, logo: "https://placehold.co/150x120/e50914/white?text=Show", group: "Entertainment", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" });
     }
   }
   buildCategories();
   renderAllRows();
 }
 
-// ---------- CATEGORY CHIPS (Netflix style) ----------
+// ---------- CATEGORY CHIPS ----------
 function buildCategories() {
   let groups = ["All", "Favorites", ...new Set(allChannels.map(c => c.group))];
   categoriesRow.innerHTML = "";
@@ -515,8 +524,8 @@ function buildCategories() {
   });
 }
 
-// Helper: generate HTML for a numbered grid (used for trending now)
-function createTrendingGrid(title, channelsList) {
+// Helper: create a grid row (for trending and for the 4 rows below)
+function createGridRow(title, channelsList, numbered = true, startNumber = 1) {
   const rowDiv = document.createElement('div');
   rowDiv.className = 'row';
   
@@ -526,12 +535,15 @@ function createTrendingGrid(title, channelsList) {
   rowDiv.appendChild(headerDiv);
   
   const gridDiv = document.createElement('div');
-  gridDiv.className = 'trending-grid';
+  // For trending we use trending-grid class, for normal rows use grid-4rows
+  if (title === "🔥 Trending Now") {
+    gridDiv.className = 'trending-grid';
+  } else {
+    gridDiv.className = 'grid-4rows';
+  }
   
-  // limit to exactly 6 items for trending grid
-  const trendingItems = channelsList.slice(0, 6);
-  trendingItems.forEach((channel, idx) => {
-    const cardNumber = idx + 1;
+  channelsList.forEach((channel, idx) => {
+    const cardNumber = numbered ? startNumber + idx : idx + 1;
     const card = document.createElement('div');
     card.className = 'trend-card';
     const isFav = favorites.includes(channel.name);
@@ -542,7 +554,7 @@ function createTrendingGrid(title, channelsList) {
       <div class="card-number"><span>${cardNumber}</span></div>
       <div class="fav-icon">${isFav ? "⭐" : "☆"}</div>
       ${resumeHtml}
-      <img src="${channel.logo}" alt="${channel.name}" loading="lazy">
+      <img src="${channel.logo}" alt="${channel.name}" loading="lazy" onerror="this.src='https://placehold.co/150x120/333/white?text=No+Image'">
       <div class="card-info">
         <div class="card-title">${channel.name}</div>
       </div>
@@ -561,52 +573,7 @@ function createTrendingGrid(title, channelsList) {
   return rowDiv;
 }
 
-// Regular horizontal scroll row for other categories (numbered)
-function createNumberedRow(title, channelsList, startNumber = 1) {
-  const rowDiv = document.createElement('div');
-  rowDiv.className = 'row';
-  
-  const headerDiv = document.createElement('div');
-  headerDiv.className = 'row-header';
-  headerDiv.innerHTML = `<div class="row-title">${title}</div>`;
-  rowDiv.appendChild(headerDiv);
-  
-  const scrollDiv = document.createElement('div');
-  scrollDiv.className = 'row-scroll';
-  
-  channelsList.forEach((channel, idx) => {
-    const cardNumber = startNumber + idx;
-    const card = document.createElement('div');
-    card.className = 'trend-card';
-    const isFav = favorites.includes(channel.name);
-    const resumePos = localStorage.getItem(`resume_${channel.name}`);
-    const resumeHtml = resumePos ? `<div class="resume-badge-mini">▶️ Resume</div>` : '';
-    
-    card.innerHTML = `
-      <div class="card-number"><span>${cardNumber}</span></div>
-      <div class="fav-icon">${isFav ? "⭐" : "☆"}</div>
-      ${resumeHtml}
-      <img src="${channel.logo}" alt="${channel.name}" loading="lazy">
-      <div class="card-info">
-        <div class="card-title">${channel.name}</div>
-      </div>
-    `;
-    
-    const favIconDiv = card.querySelector('.fav-icon');
-    favIconDiv.onclick = (e) => {
-      e.stopPropagation();
-      toggleFavorite(channel.name);
-    };
-    
-    card.onclick = () => playChannel(channel.stream, channel.name);
-    scrollDiv.appendChild(card);
-  });
-  
-  rowDiv.appendChild(scrollDiv);
-  return rowDiv;
-}
-
-// ---------- RENDER: TRENDING NOW (GRID, 6 items) + other rows ----------
+// ---------- RENDER: TRENDING NOW (exactly 6 items grid) + exactly 4 rows below (grid) ----------
 function renderAllRows() {
   rowsContainer.innerHTML = "";
   
@@ -623,68 +590,113 @@ function renderAllRows() {
     return;
   }
   
-  // 1️⃣ TRENDING NOW: exact 6 items in GRID LAYOUT
-  let trendingPool = finalChannels;
-  // If in Favorites mode but favs <6 we still show trending based on current category
-  let trendingItems = trendingPool.slice(0, 6);
-  // make sure we always have 6 (if less than 6, generate filler using remaining but limit)
-  if (trendingItems.length < 6 && trendingPool.length >= trendingItems.length) {
-    // If possible, add more but slice ensures max 6
-    trendingItems = trendingPool.slice(0,6);
-  }
+  // 1️⃣ TRENDING NOW: FIRST 6 ITEMS IN A GRID (exactly 6)
+  let trendingItems = finalChannels.slice(0, 6);
+  // ensure we have exactly 6 items for trending if possible, else show what we have
   if (trendingItems.length > 0) {
-    let trendingGridRow = createTrendingGrid("🔥 Trending Now", trendingItems);
-    rowsContainer.appendChild(trendingGridRow);
+    let trendingRow = createGridRow("🔥 Trending Now", trendingItems, true, 1);
+    rowsContainer.appendChild(trendingRow);
   } else {
-    // fallback dummy
-    let dummy = trendingPool.slice(0,6);
-    if(dummy.length) rowsContainer.appendChild(createTrendingGrid("🔥 Trending Now", dummy));
+    // fallback
+    let dummy = finalChannels.slice(0, Math.min(6, finalChannels.length));
+    if(dummy.length) rowsContainer.appendChild(createGridRow("🔥 Trending Now", dummy, true, 1));
   }
   
-  // 2️⃣ TOP PICKS FOR YOU (horizontal numbered row, next 6 items after trending)
-  let remainingAfterTrend = finalChannels.slice(6);
-  let topPicks = remainingAfterTrend.slice(0, 8);
-  if (topPicks.length > 0) {
-    let picksRow = createNumberedRow("✨ Top Picks for You", topPicks, 1);
-    rowsContainer.appendChild(picksRow);
-  }
+  // Get remaining channels after taking first 6
+  let remainingChannels = finalChannels.slice(6);
   
-  // 3️⃣ Group based rows: by category but skip showing "Trending" group duplicate? we can show others
-  let groupsMap = new Map();
-  finalChannels.forEach(ch => {
-    if (!groupsMap.has(ch.group)) groupsMap.set(ch.group, []);
-    groupsMap.get(ch.group).push(ch);
+  // CREATE EXACTLY 4 ROWS BELOW (grid layout)
+  // We'll split remainingChannels into 4 chunks (each row shows up to 12 items ideally)
+  // But we want to show variety: use different categories or just split data
+  
+  // Strategy: Show 4 distinct category-based rows or if not enough categories, split sequentially
+  // To make it feel premium, we'll group by unique genres/categories from the remaining list.
+  
+  // Get unique groups from remainingChannels (excluding any group named Trending)
+  let groupMap = new Map();
+  remainingChannels.forEach(ch => {
+    let grp = ch.group;
+    if (!groupMap.has(grp)) groupMap.set(grp, []);
+    groupMap.get(grp).push(ch);
   });
   
-  // Sort groups for consistent display
-  let sortedGroups = Array.from(groupsMap.keys()).sort();
-  for (let groupName of sortedGroups) {
-    // avoid showing Trending group again because Trending Now already covers the first 6 of all or category
-    if (groupName === "Trending" && currentCategory !== "Favorites") {
-      // Still, if filtered within trending group itself we may skip to avoid duplication, but we ensure remaining items after first 6
-      let groupChannels = groupsMap.get(groupName);
-      let nonDuplicate = groupChannels.filter(ch => !trendingItems.includes(ch));
-      if (nonDuplicate.length > 0) {
-        let row = createNumberedRow(`📺 ${groupName} (More)`, nonDuplicate.slice(0, 12), 1);
-        rowsContainer.appendChild(row);
-      }
-      continue;
+  // Sort groups and take first 4 distinct categories for the rows
+  let availableGroups = Array.from(groupMap.keys()).sort();
+  let rowsToShow = [];
+  
+  // We want exactly 4 rows. If we have 4+ groups, pick first 4.
+  if (availableGroups.length >= 4) {
+    for (let i = 0; i < 4; i++) {
+      let grp = availableGroups[i];
+      let channelsInGroup = groupMap.get(grp);
+      // Show up to 12 items per row but grid will adapt
+      let displayItems = channelsInGroup.slice(0, 12);
+      rowsToShow.push({ title: `📺 ${grp}`, items: displayItems });
     }
-    let groupChannels = groupsMap.get(groupName);
-    if (groupChannels.length > 0) {
-      let row = createNumberedRow(`📺 ${groupName}`, groupChannels.slice(0, 15), 1);
-      rowsContainer.appendChild(row);
+  } else {
+    // Not enough distinct groups, we fill remaining rows with sequential chunks
+    for (let g of availableGroups) {
+      let channelsInGroup = groupMap.get(g);
+      let displayItems = channelsInGroup.slice(0, 12);
+      rowsToShow.push({ title: `📺 ${g}`, items: displayItems });
+    }
+    // If we still need more rows, take extra chunks from remainingChannels (not yet used)
+    let usedCount = 0;
+    let allRemainingFlat = remainingChannels;
+    // Avoid duplicates from groups already used
+    let usedChannelsSet = new Set();
+    rowsToShow.forEach(row => {
+      row.items.forEach(ch => usedChannelsSet.add(ch));
+    });
+    let freshRemaining = allRemainingFlat.filter(ch => !usedChannelsSet.has(ch));
+    while (rowsToShow.length < 4 && freshRemaining.length > 0) {
+      let chunk = freshRemaining.slice(0, 12);
+      if (chunk.length === 0) break;
+      rowsToShow.push({ title: `✨ More Picks`, items: chunk });
+      freshRemaining = freshRemaining.slice(12);
+    }
+    // Final fallback: just duplicate some if still not 4 rows but we have data
+    if (rowsToShow.length < 4 && remainingChannels.length > 0) {
+      let extraTitle = ["🎬 Must Watch", "🌟 Top Rated", "📺 Recommended", "🔥 Binge Worthy"];
+      let idx = 0;
+      while (rowsToShow.length < 4 && idx < extraTitle.length) {
+        let fallbackItems = remainingChannels.slice(0, 12);
+        if (fallbackItems.length > 0) {
+          rowsToShow.push({ title: extraTitle[idx], items: fallbackItems });
+        }
+        idx++;
+      }
     }
   }
   
-  // 4️⃣ Favorites row if not already in favorites category and have favs
-  if (currentCategory !== "Favorites" && favorites.length > 0) {
-    let favChannels = finalChannels.filter(ch => favorites.includes(ch.name));
-    if (favChannels.length > 0) {
-      let favRow = createNumberedRow("⭐ My Favorites", favChannels.slice(0, 12), 1);
-      rowsContainer.appendChild(favRow);
+  // Ensure exactly 4 rows maximum (if more due to logic, slice, but we control)
+  const finalFourRows = rowsToShow.slice(0, 4);
+  
+  // Append the 4 rows with grid layout
+  for (let rowData of finalFourRows) {
+    // For each row we create grid row, numbered starting from 1
+    let row = createGridRow(rowData.title, rowData.items, true, 1);
+    rowsContainer.appendChild(row);
+  }
+  
+  // If for some reason we don't have 4 rows (very rare because of fallback), add filler rows with remaining data
+  if (finalFourRows.length < 4 && remainingChannels.length > 0) {
+    let needed = 4 - finalFourRows.length;
+    let fillerItems = remainingChannels.slice(0, needed * 12);
+    for (let f = 0; f < needed; f++) {
+      let startIdx = f * 12;
+      let chunk = fillerItems.slice(startIdx, startIdx + 12);
+      if (chunk.length > 0) {
+        let fillerRow = createGridRow(`📺 Recommendations ${f+1}`, chunk, true, 1);
+        rowsContainer.appendChild(fillerRow);
+      }
     }
   }
+  
+  // Add Favorites row as extra if category is not Favorites and we have favs not already shown? But request says "tangalin yung top picks, vivamax other and etc." 
+  // But we follow exactly: Trending Now + 4 rows. However we can optionally add favorites row only if user has favorites AND not already in those rows? 
+  // To keep clean and exactly 4 rows below, we decide NOT to add extra rows beyond 4. But if user wants favorites, they can click Favorites category.
+  // So we strictly show max 1 trending row + 4 content rows. No additional extras like Top picks, VivaMax, etc.
 }
 
 // ---------- FAVORITE LOGIC ----------
@@ -836,14 +848,12 @@ document.addEventListener('click', (e) => {
   if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) menu.classList.remove('show');
 });
 
-// expose global helpers
 window.toggleFavorite = toggleFavorite;
 window.playChannel = playChannel;
 window.closePlayer = closePlayer;
 window.setQuality = setQuality;
 window.toggleTheaterMode = toggleTheaterMode;
 
-// Bootstrap
 loadChannels();
 </script>
 </body>
