@@ -354,6 +354,36 @@ video {
   .main-content { padding-top: 75px; }
   .categories-row { padding: 0 16px 12px 16px; top: 64px; }
 }
+
+/* New GRID layout for Trending Now - exactly 6 items in a responsive grid */
+.trending-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  max-width: 100%;
+}
+.trending-grid .trend-card {
+  flex: unset;
+  width: 100%;
+  margin: 0;
+}
+@media (min-width: 1100px) {
+  .trending-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+@media (max-width: 900px) and (min-width: 600px) {
+  .trending-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 599px) {
+  .trending-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 </style>
 </head>
 <body>
@@ -437,14 +467,30 @@ async function loadChannels() {
     if (allChannels.length === 0) throw new Error("no channels");
   } catch(e) {
     console.warn("fallback demo data");
-    allChannels = [
-      { name: "Netflix Originals", logo: "https://placehold.co/150x120/e50914/white?text=Trend1", group: "Trending", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-      { name: "Action Movies", logo: "https://placehold.co/150x120/222/white?text=Action", group: "Movies", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-      { name: "Comedy Central", logo: "https://placehold.co/150x120/333/white?text=Comedy", group: "Comedy", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-      { name: "Sports HD", logo: "https://placehold.co/150x120/004e92/white?text=Sports", group: "Sports", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-      { name: "News 24/7", logo: "https://placehold.co/150x120/2c3e50/white?text=News", group: "News", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
-    ];
-    for(let i=0;i<12;i++) allChannels.push({ name: `Channel ${i+10}`, logo: `https://placehold.co/150x120/444/white?text=Ch${i+10}`, group: "Popular", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" });
+    // generate rich demo content to show trending grid properly
+    allChannels = [];
+    const groupsList = ["Trending", "Movies", "Sports", "News", "Comedy", "Kids", "Music", "Lifestyle"];
+    for (let i = 1; i <= 36; i++) {
+      let group = groupsList[i % groupsList.length];
+      let name = "";
+      if (i === 1) name = "Squid Game: Challenge";
+      else if (i === 2) name = "The Crown S6";
+      else if (i === 3) name = "Stranger Things 5";
+      else if (i === 4) name = "Wednesday S2";
+      else if (i === 5) name = "Money Heist Berlin";
+      else if (i === 6) name = "Bridgerton S3";
+      else name = `${group} Channel ${i}`;
+      allChannels.push({
+        name: name,
+        logo: `https://placehold.co/150x120/${Math.floor(Math.random()*0xffffff).toString(16)}/white?text=${encodeURIComponent(name.slice(0,8))}`,
+        group: group,
+        stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+      });
+    }
+    // Ensure we have at least 6 for trending grid
+    if(allChannels.length < 6) {
+      for(let i=0;i<6;i++) allChannels.push({ name: `Hot Show ${i+1}`, logo: "https://placehold.co/150x120/e50914/white?text=Trend", group: "Trending", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" });
+    }
   }
   buildCategories();
   renderAllRows();
@@ -469,70 +515,59 @@ function buildCategories() {
   });
 }
 
-// ---------- RENDER NETFLIX ROWS + TRENDING WITH NUMBERS 1 2 3 4 5 6 ----------
-function renderAllRows() {
-  rowsContainer.innerHTML = "";
+// Helper: generate HTML for a numbered grid (used for trending now)
+function createTrendingGrid(title, channelsList) {
+  const rowDiv = document.createElement('div');
+  rowDiv.className = 'row';
   
-  // Filter based on category & search
-  let searchTerm = searchInput.value.toLowerCase();
-  let filteredByCat = allChannels.filter(ch => {
-    if (currentCategory === "Favorites") return favorites.includes(ch.name);
-    if (currentCategory === "All") return true;
-    return ch.group === currentCategory;
+  const headerDiv = document.createElement('div');
+  headerDiv.className = 'row-header';
+  headerDiv.innerHTML = `<div class="row-title">${title}</div>`;
+  rowDiv.appendChild(headerDiv);
+  
+  const gridDiv = document.createElement('div');
+  gridDiv.className = 'trending-grid';
+  
+  // limit to exactly 6 items for trending grid
+  const trendingItems = channelsList.slice(0, 6);
+  trendingItems.forEach((channel, idx) => {
+    const cardNumber = idx + 1;
+    const card = document.createElement('div');
+    card.className = 'trend-card';
+    const isFav = favorites.includes(channel.name);
+    const resumePos = localStorage.getItem(`resume_${channel.name}`);
+    const resumeHtml = resumePos ? `<div class="resume-badge-mini">▶️ Resume</div>` : '';
+    
+    card.innerHTML = `
+      <div class="card-number"><span>${cardNumber}</span></div>
+      <div class="fav-icon">${isFav ? "⭐" : "☆"}</div>
+      ${resumeHtml}
+      <img src="${channel.logo}" alt="${channel.name}" loading="lazy">
+      <div class="card-info">
+        <div class="card-title">${channel.name}</div>
+      </div>
+    `;
+    
+    const favIconDiv = card.querySelector('.fav-icon');
+    favIconDiv.onclick = (e) => {
+      e.stopPropagation();
+      toggleFavorite(channel.name);
+    };
+    card.onclick = () => playChannel(channel.stream, channel.name);
+    gridDiv.appendChild(card);
   });
-  let finalChannels = filteredByCat.filter(ch => ch.name.toLowerCase().includes(searchTerm));
   
-  if (finalChannels.length === 0) {
-    rowsContainer.innerHTML = `<div style="padding: 60px 24px; text-align:center; color:#aaa;">✨ No channels found ✨</div>`;
-    return;
-  }
-  
-  // 1️⃣ TRENDING ROW (numbered 1 to 6) -> first 6 channels as trending
-  let trendingItems = finalChannels.slice(0, Math.min(12, finalChannels.length));
-  if (trendingItems.length > 0) {
-    let trendingRow = createNumberedRow("🔥 Trending Now", trendingItems, 1);
-    rowsContainer.appendChild(trendingRow);
-  }
-  
-  // 2️⃣ TOP PICKS ROW (numbered 1-6 again for variety) Next 6 channels (if exist)
-  let topPicks = finalChannels.slice(6, 12);
-  if (topPicks.length > 0) {
-    let picksRow = createNumberedRow("✨ Top Picks for You", topPicks, 1);
-    rowsContainer.appendChild(picksRow);
-  }
-  
-  // 3️⃣ Category based rows: group by genre (group)
-  let groupsMap = new Map();
-  finalChannels.forEach(ch => {
-    if (!groupsMap.has(ch.group)) groupsMap.set(ch.group, []);
-    groupsMap.get(ch.group).push(ch);
-  });
-  
-  // display each group as a separate row (with numbers starting from 1 again)
-  for (let [groupName, groupChannels] of groupsMap.entries()) {
-    if (groupName === "Trending") continue;
-    let row = createNumberedRow(`📺 ${groupName}`, groupChannels.slice(0, 15), 1);
-    rowsContainer.appendChild(row);
-  }
-  
-  // favorites row if category is not Favorites already
-  if (currentCategory !== "Favorites" && favorites.length > 0) {
-    let favChannels = finalChannels.filter(ch => favorites.includes(ch.name));
-    if (favChannels.length > 0) {
-      let favRow = createNumberedRow("⭐ My Favorites", favChannels.slice(0, 12), 1);
-      rowsContainer.appendChild(favRow);
-    }
-  }
+  rowDiv.appendChild(gridDiv);
+  return rowDiv;
 }
 
-// create a horizontal scroll row with numbered badges (1,2,3...) - NO "NETFLIX STYLE" BADGE
+// Regular horizontal scroll row for other categories (numbered)
 function createNumberedRow(title, channelsList, startNumber = 1) {
   const rowDiv = document.createElement('div');
   rowDiv.className = 'row';
   
   const headerDiv = document.createElement('div');
   headerDiv.className = 'row-header';
-  // Removed the "NETFLIX STYLE" badge div - now only the title is shown
   headerDiv.innerHTML = `<div class="row-title">${title}</div>`;
   rowDiv.appendChild(headerDiv);
   
@@ -540,7 +575,7 @@ function createNumberedRow(title, channelsList, startNumber = 1) {
   scrollDiv.className = 'row-scroll';
   
   channelsList.forEach((channel, idx) => {
-    const cardNumber = startNumber + idx;  // 1,2,3,4...
+    const cardNumber = startNumber + idx;
     const card = document.createElement('div');
     card.className = 'trend-card';
     const isFav = favorites.includes(channel.name);
@@ -571,6 +606,87 @@ function createNumberedRow(title, channelsList, startNumber = 1) {
   return rowDiv;
 }
 
+// ---------- RENDER: TRENDING NOW (GRID, 6 items) + other rows ----------
+function renderAllRows() {
+  rowsContainer.innerHTML = "";
+  
+  let searchTerm = searchInput.value.toLowerCase();
+  let filteredByCat = allChannels.filter(ch => {
+    if (currentCategory === "Favorites") return favorites.includes(ch.name);
+    if (currentCategory === "All") return true;
+    return ch.group === currentCategory;
+  });
+  let finalChannels = filteredByCat.filter(ch => ch.name.toLowerCase().includes(searchTerm));
+  
+  if (finalChannels.length === 0) {
+    rowsContainer.innerHTML = `<div style="padding: 60px 24px; text-align:center; color:#aaa;">✨ No channels found ✨</div>`;
+    return;
+  }
+  
+  // 1️⃣ TRENDING NOW: exact 6 items in GRID LAYOUT
+  let trendingPool = finalChannels;
+  // If in Favorites mode but favs <6 we still show trending based on current category
+  let trendingItems = trendingPool.slice(0, 6);
+  // make sure we always have 6 (if less than 6, generate filler using remaining but limit)
+  if (trendingItems.length < 6 && trendingPool.length >= trendingItems.length) {
+    // If possible, add more but slice ensures max 6
+    trendingItems = trendingPool.slice(0,6);
+  }
+  if (trendingItems.length > 0) {
+    let trendingGridRow = createTrendingGrid("🔥 Trending Now", trendingItems);
+    rowsContainer.appendChild(trendingGridRow);
+  } else {
+    // fallback dummy
+    let dummy = trendingPool.slice(0,6);
+    if(dummy.length) rowsContainer.appendChild(createTrendingGrid("🔥 Trending Now", dummy));
+  }
+  
+  // 2️⃣ TOP PICKS FOR YOU (horizontal numbered row, next 6 items after trending)
+  let remainingAfterTrend = finalChannels.slice(6);
+  let topPicks = remainingAfterTrend.slice(0, 8);
+  if (topPicks.length > 0) {
+    let picksRow = createNumberedRow("✨ Top Picks for You", topPicks, 1);
+    rowsContainer.appendChild(picksRow);
+  }
+  
+  // 3️⃣ Group based rows: by category but skip showing "Trending" group duplicate? we can show others
+  let groupsMap = new Map();
+  finalChannels.forEach(ch => {
+    if (!groupsMap.has(ch.group)) groupsMap.set(ch.group, []);
+    groupsMap.get(ch.group).push(ch);
+  });
+  
+  // Sort groups for consistent display
+  let sortedGroups = Array.from(groupsMap.keys()).sort();
+  for (let groupName of sortedGroups) {
+    // avoid showing Trending group again because Trending Now already covers the first 6 of all or category
+    if (groupName === "Trending" && currentCategory !== "Favorites") {
+      // Still, if filtered within trending group itself we may skip to avoid duplication, but we ensure remaining items after first 6
+      let groupChannels = groupsMap.get(groupName);
+      let nonDuplicate = groupChannels.filter(ch => !trendingItems.includes(ch));
+      if (nonDuplicate.length > 0) {
+        let row = createNumberedRow(`📺 ${groupName} (More)`, nonDuplicate.slice(0, 12), 1);
+        rowsContainer.appendChild(row);
+      }
+      continue;
+    }
+    let groupChannels = groupsMap.get(groupName);
+    if (groupChannels.length > 0) {
+      let row = createNumberedRow(`📺 ${groupName}`, groupChannels.slice(0, 15), 1);
+      rowsContainer.appendChild(row);
+    }
+  }
+  
+  // 4️⃣ Favorites row if not already in favorites category and have favs
+  if (currentCategory !== "Favorites" && favorites.length > 0) {
+    let favChannels = finalChannels.filter(ch => favorites.includes(ch.name));
+    if (favChannels.length > 0) {
+      let favRow = createNumberedRow("⭐ My Favorites", favChannels.slice(0, 12), 1);
+      rowsContainer.appendChild(favRow);
+    }
+  }
+}
+
 // ---------- FAVORITE LOGIC ----------
 function toggleFavorite(name) {
   if (favorites.includes(name)) {
@@ -579,7 +695,7 @@ function toggleFavorite(name) {
     favorites.push(name);
   }
   localStorage.setItem("favorites", JSON.stringify(favorites));
-  renderAllRows();  // refresh all rows
+  renderAllRows();
 }
 
 // ---------- SEARCH ----------
@@ -616,7 +732,6 @@ function playChannel(streamUrl, channelName) {
   attachBuffering(video);
   video.preload = 'auto';
   
-  // resume
   let savedTime = localStorage.getItem(`resume_${channelName}`);
   const resumeHandler = () => {
     if (savedTime && video.duration && video.duration > 10 && parseFloat(savedTime) < video.duration - 5) {
